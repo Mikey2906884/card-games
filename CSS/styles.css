@@ -5,34 +5,67 @@
 }
 
 body {
+  position: relative;
   height: 100vh;
+  width: 100vw;
   overflow: hidden;
-  border: 2px solid black;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 3vh;
+  font-weight: bold;
+  background-color: green;
+  color: maroon;
+  justify-content: center;
+  align-items: center;
+}
+
+#game-area {
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100%;
+  width: 100%;
 }
 
 #deck {
   position: relative;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  gap: 2px;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 3 / 4;
+  border: 5px solid gray;
+  border-radius: 10px;
 }
 
 .card-container {
-  /* position: absolute; */
-  width: 7vw;
-  aspect-ratio: 72 / 96;
-  left: -3.5vw;
-  top: calc(-7vw * 72 / 96);
+  position: absolute;
+  aspect-ratio: 3 / 4;
   perspective: 20vw;
+  transition: all 0.5s;
 }
 
-.card-container:hover > .card {
+@media (orientation: landscape) {
+  #deck {
+    height: calc(21vh + 10px);
+  }
+
+  .card-container {
+    height: 21vh;
+  }
+}
+
+@media (orientation: portrait) {
+  #deck {
+    width: calc(14vw + 10px);
+  }
+  .card-container {
+    width: 14vw;
+  }
+}
+
+div.player > .card-container:hover {
   cursor: pointer;
-  transform: rotateY(0deg);
+  bottom: 5vh;
 }
 
 .card {
@@ -40,7 +73,6 @@ body {
   position: relative;
   height: 100%;
   width: 100%;
-  transition: transform 1.5s;
   transform: rotateY(180deg);
   transform-style: preserve-3d;
 }
@@ -57,11 +89,11 @@ body {
 }
 
 #front {
-  background-size: cover;
+  background-size: contain;
 }
 
 #back {
   background-image: url("../Cards/BBACK.png");
-  background-size: cover;
+  background-size: contain;
   transform: rotateY(180deg);
 }
