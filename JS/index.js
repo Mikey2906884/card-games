@@ -13,6 +13,72 @@ Array.prototype.shuffle = function () {
   return this;
 };
 
+export function correctHandVis(hand) {
+  let maxWidth;
+  const cardsInHand = hand.querySelectorAll(".card-container");
+
+  if (Array.from(hand.classList).includes("h-hand")) {
+    maxWidth = (parseFloat(hand.style.maxWidth) / 100) * window.innerWidth;
+  } else if (Array.from(hand.classList).includes("v-hand")) {
+    if (hand.style.left) {
+      hand.style.transform = `rotate(90deg) translate(0, ${
+        (hand.offsetWidth - hand.offsetHeight) / 2
+      }px)`;
+    } else {
+      hand.style.transform = `rotate(90deg) translate(0, -${
+        (hand.offsetWidth - hand.offsetHeight) / 2
+      }px)`;
+    }
+
+    maxWidth = (parseFloat(hand.style.maxWidth) / 100) * window.innerHeight;
+  }
+
+  for (let card of cardsInHand) {
+    card.style.marginRight = null;
+    card.style.marginLeft = null;
+
+    if (hand.style.left) {
+      hand.style.transform = `rotate(90deg) translate(0, ${
+        (cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth -
+          hand.offsetHeight) /
+        2
+      }px)`;
+    } else if (hand.style.right) {
+      hand.style.transform = `rotate(90deg) translate(0, -${
+        (cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth -
+          hand.offsetHeight) /
+        2
+      }px)`;
+    }
+  }
+
+  if (cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth >= maxWidth) {
+    for (let card of cardsInHand) {
+      card.style.marginRight = `-${
+        (card.offsetWidth -
+          (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
+        2
+      }px`;
+      card.style.marginLeft = `-${
+        (card.offsetWidth -
+          (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
+        2
+      }px`;
+    }
+    if (hand.style.left) {
+      hand.style.transform = `rotate(90deg) translate(0, ${
+        (maxWidth - hand.offsetHeight) / 2 +
+        parseFloat(hand.querySelector(".card-container").style.marginRight)
+      }px)`;
+    } else if (hand.style.right) {
+      hand.style.transform = `rotate(90deg) translate(0, -${
+        (maxWidth - hand.offsetHeight) / 2 +
+        parseFloat(hand.querySelector(".card-container").style.marginRight)
+      }px)`;
+    }
+  }
+}
+
 const createDeck = function () {
   const values = [
     "A",

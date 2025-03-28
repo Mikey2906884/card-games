@@ -27,7 +27,8 @@ body {
   width: 100%;
 }
 
-#deck {
+#deck,
+#discard {
   position: relative;
   display: flex;
   justify-content: center;
@@ -35,6 +36,32 @@ body {
   aspect-ratio: 3 / 4;
   border: 5px solid gray;
   border-radius: 10px;
+}
+
+#deck {
+  left: -1.5vw;
+}
+
+#discard {
+  left: 1.5vw;
+}
+
+#com-hand-one,
+#com-hand-two,
+#com-hand-three,
+#player-hand {
+  position: absolute;
+  display: flex;
+}
+
+#com-hand-one,
+#com-hand-three {
+  margin: auto 0;
+}
+
+#com-hand-two,
+#player-hand {
+  margin: 0 auto;
 }
 
 .card-container {
@@ -45,7 +72,8 @@ body {
 }
 
 @media (orientation: landscape) {
-  #deck {
+  #deck,
+  #discard {
     height: calc(21vh + 10px);
   }
 
@@ -55,7 +83,8 @@ body {
 }
 
 @media (orientation: portrait) {
-  #deck {
+  #deck,
+  #discard {
     width: calc(14vw + 10px);
   }
   .card-container {
@@ -89,11 +118,14 @@ div.player > .card-container:hover {
 }
 
 #front {
-  background-size: contain;
+  background-size: cover;
 }
 
 #back {
-  background-image: url("../Cards/BBACK.png");
-  background-size: contain;
+  background-image: url("../Images/Cards/BBACK.png");
+  background-size: cover;
   transform: rotateY(180deg);
+}
+
+.hand {
 }

@@ -1,3 +1,5 @@
+import { correctHandVis } from "./index.js";
+
 function randBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -14,61 +16,12 @@ const correctCardOrder = (container) => {
   return cards;
 };
 
-const correctHandVis = function (hand) {
-  let maxWidth;
-  const cardsInHand = hand.querySelectorAll(".card-container");
-
-  if (Array.from(hand.classList).includes("h-hand")) {
-    maxWidth = (parseInt(hand.style.maxWidth) / 100) * window.innerWidth;
-  } else if (Array.from(hand.classList).includes("v-hand")) {
-    if (hand.style.left) {
-      hand.style.transform = `rotate(90deg) translate(0, ${
-        (hand.offsetWidth - hand.offsetHeight) / 2
-      }px)`;
-    } else {
-      hand.style.transform = `rotate(90deg) translate(0, -${
-        (hand.offsetWidth - hand.offsetHeight) / 2
-      }px)`;
-    }
-
-    maxWidth = (parseInt(hand.style.maxWidth) / 100) * window.innerHeight;
-  }
-
-  if (hand.offsetWidth >= maxWidth) {
-    if (hand.style.left) {
-      hand.style.transform = `rotate(90deg) translate(0, 50%)`;
-    } else if (hand.style.right) {
-      hand.style.transform = `rotate(90deg) translate(0, -50%)`;
-    }
-
-    for (let card of cardsInHand) {
-      card.style.marginRight = `-${
-        (card.offsetWidth -
-          (hand.offsetWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
-        2
-      }px`;
-      card.style.marginLeft = `-${
-        (card.offsetWidth -
-          (hand.offsetWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
-        2
-      }px`;
-    }
-  } else {
-    for (let card of cardsInHand) {
-      card.style.marginRight = null;
-      card.style.marginLeft = null;
-    }
-  }
-};
-
 const moveCard = function (from, to, card) {
   const cardPicker = document.getElementById(`${cardName(card)}-container`);
   const fromClassList = Array.from(from.classList);
   const toClassList = Array.from(to.classList);
 
-  console.log(from.offsetWidth, from.offsetHeight);
   from.removeChild(cardPicker);
-  console.log(from.offsetWidth);
   to.appendChild(cardPicker);
   correctCardOrder(to);
 
@@ -108,12 +61,13 @@ const populateDeck = function (deck, backColor) {
 
     container.id = `${i}-container`;
     container.className = "card-container";
+    container.style.flexShrink = 0;
     card.id = i;
     card.className = "card";
     front.id = "front";
-    front.style.backgroundImage = `url("../Cards/${i}.png")`;
+    front.style.backgroundImage = `url("../Images/Cards/${i}.png")`;
     back.id = "back";
-    back.style.backgroundImage = `url("../Cards/Backs/${backColor}.png")`;
+    back.style.backgroundImage = `url("../Images/Cards/Backs/${backColor}.png")`;
 
     parent.appendChild(container);
     container.appendChild(card);
@@ -125,64 +79,15 @@ const populateDeck = function (deck, backColor) {
 const createDiscard = function (deckDiv, gameArea) {
   const discard = document.createElement("div");
 
-  [
-    discard.id,
-    discard.classList,
-    discard.style.position,
-    discard.style.display,
-    discard.style.justifyContent,
-    discard.style.alignItems,
-    discard.style.height,
-    discard.style.aspectRatio,
-    discard.style.border,
-    discard.style.borderRadius,
-    discard.style.left,
-  ] = [
-    "discard-pile",
-    "discard deck",
-    "relative",
-    "flex",
-    "center",
-    "center",
-    `${(100 * deckDiv.offsetHeight) / window.innerHeight}vh`,
-    "72 / 96",
-    "5px solid grey",
-    "10px",
-    "1.5vw",
-  ];
-  deckDiv.style.left = "-1.5vw";
+  [discard.id, discard.classList] = ["discard", "discard deck"];
 
   gameArea.appendChild(discard);
   return discard;
 };
 
-const createPlayerHand = function (gameArea) {
-  const playerHand = document.createElement("div");
-
-  [
-    playerHand.id,
-    playerHand.classList,
-    playerHand.style.position,
-    playerHand.style.display,
-    playerHand.style.maxWidth,
-    playerHand.style.bottom,
-    playerHand.style.margin,
-  ] = [
-    "player-hand",
-    "hand h-hand player",
-    "absolute",
-    "flex",
-    "50vw",
-    "0",
-    "0 auto",
-  ];
-
-  gameArea.appendChild(playerHand);
-  return playerHand;
-};
-
-const createComHands = function (gameArea) {
+const createHands = function (gameArea) {
   const comHands = [];
+  const playerHand = document.createElement("div");
 
   for (let i = 0; i < 3; i++) {
     comHands.push(document.createElement("div"));
@@ -191,67 +96,109 @@ const createComHands = function (gameArea) {
   [
     comHands[0].id,
     comHands[0].classList,
-    comHands[0].style.position,
-    comHands[0].style.display,
-    comHands[0].style.justifyContent,
     comHands[0].style.maxWidth,
     comHands[0].style.left,
-    comHands[0].style.margin,
-    comHands[0].style.transform,
-  ] = [
-    "com-hand-one",
-    "hand v-hand",
-    "absolute",
-    "flex",
-    "center",
-    "50vh",
-    "0",
-    "auto 0",
-    "rotate(-90deg)",
-  ];
+  ] = ["com-hand-one", "hand v-hand", "50vh", "0"];
 
   [
     comHands[1].id,
     comHands[1].classList,
-    comHands[1].style.position,
-    comHands[1].style.display,
     comHands[1].style.maxWidth,
     comHands[1].style.top,
-    comHands[1].style.margin,
-  ] = [
-    "com-hand-two",
-    "hand h-hand",
-    "absolute",
-    "flex",
-    "50vw",
-    "0",
-    "0 auto",
-  ];
+  ] = ["com-hand-two", "hand h-hand", "50vw", "0"];
 
   [
     comHands[2].id,
     comHands[2].classList,
-    comHands[2].style.position,
-    comHands[2].style.display,
     comHands[2].style.maxWidth,
     comHands[2].style.right,
-    comHands[2].style.margin,
-    comHands[2].style.transform,
-  ] = [
-    "com-hand-three",
-    "hand v-hand",
-    "absolute",
-    "flex",
-    "50vh",
-    "0",
-    "auto 0",
-    "rotate(90deg)",
-  ];
+  ] = ["com-hand-three", "hand v-hand", "50vh", "0"];
+
+  [
+    playerHand.id,
+    playerHand.classList,
+    playerHand.style.maxWidth,
+    playerHand.style.bottom,
+  ] = ["player-hand", "hand h-hand player", "50vw", "0"];
+
+  playerHand.addEventListener("mouseover", () => {
+    const cardsInHand = playerHand.querySelectorAll(".card-container");
+    const maxWidth =
+      (parseFloat(playerHand.style.maxWidth) / 100) * window.innerWidth;
+
+    for (let card of cardsInHand) {
+      card.addEventListener("mouseenter", function () {
+        card.style.marginRight = null;
+        card.style.marginLeft = null;
+
+        if (
+          cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth >=
+            maxWidth &&
+          card.parentElement.id == "player-hand"
+        ) {
+          card.style.marginRight = `-${
+            (card.offsetWidth -
+              (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
+              2 -
+            (0.9 *
+              (card.offsetWidth -
+                (maxWidth - card.offsetWidth) / (cardsInHand.length - 1))) /
+              2
+          }px`;
+          card.style.marginLeft = `-${
+            (card.offsetWidth -
+              (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
+              2 -
+            (0.25 *
+              (card.offsetWidth -
+                (maxWidth - card.offsetWidth) / (cardsInHand.length - 1))) /
+              2
+          }px`;
+        }
+      });
+      card.addEventListener("mouseleave", function () {
+        card.style.marginRight = null;
+        card.style.marginLeft = null;
+
+        if (
+          cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth >=
+          maxWidth
+        ) {
+          card.style.marginRight = `-${
+            (card.offsetWidth -
+              (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
+            2
+          }px`;
+          card.style.marginLeft = `-${
+            (card.offsetWidth -
+              (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
+            2
+          }px`;
+        }
+      });
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    setTimeout(function () {
+      const [playerHand, comHandOne, comHandTwo, comHandThree] = [
+        document.getElementById("player-hand"),
+        document.getElementById("com-hand-one"),
+        document.getElementById("com-hand-two"),
+        document.getElementById("com-hand-three"),
+      ];
+      correctHandVis(playerHand);
+      correctHandVis(comHandOne);
+      correctHandVis(comHandTwo);
+      correctHandVis(comHandThree);
+    }, 1000);
+  });
 
   gameArea.appendChild(comHands[0]);
   gameArea.appendChild(comHands[1]);
   gameArea.appendChild(comHands[2]);
-  return [comHands[0], comHands[1], comHands[2]];
+  gameArea.appendChild(playerHand);
+  return [comHands[0], comHands[1], comHands[2], playerHand];
 };
 
 const initialDeal = function (
@@ -297,10 +244,12 @@ export function crazyEights(deck, cardBack) {
   const deckDiv = document.getElementById("deck");
   let cards = deckDiv.querySelectorAll(".card-container");
   const discard = createDiscard(deckDiv, gameArea);
-  const playerHand = createPlayerHand(gameArea);
-  const [comHandOne, comHandTwo, comHandThree] = createComHands(gameArea);
+  const [comHandOne, comHandTwo, comHandThree, playerHand] =
+    createHands(gameArea);
   const turnOrder = randBetween(1, 4);
 
+  gameArea.style.backgroundImage = "url('../Images/Backgrounds/CRAZY_BG.png')";
+  gameArea.style.backgroundSize = "contain";
   initialDeal(
     deckDiv,
     playerHand,
@@ -319,6 +268,16 @@ export function crazyEights(deck, cardBack) {
         moveCard(deckDiv, comHandOne, card);
       } else if (Array.from(cardsInHand).includes(card)) {
         moveCard(comHandOne, deckDiv, card);
+      }
+    });
+    card.addEventListener("click", function () {
+      const cardsInDeck = discard.querySelectorAll(".card-container");
+      const cardsInHand = playerHand.querySelectorAll(".card-container");
+
+      if (Array.from(cardsInDeck).includes(card)) {
+        moveCard(discard, playerHand, card);
+      } else if (Array.from(cardsInHand).includes(card)) {
+        moveCard(playerHand, discard, card);
       }
     });
   }
