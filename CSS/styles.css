@@ -38,14 +38,6 @@ body {
   border-radius: 10px;
 }
 
-#deck {
-  left: -1.5vw;
-}
-
-#discard {
-  left: 1.5vw;
-}
-
 #com-hand-one,
 #com-hand-two,
 #com-hand-three,
@@ -125,7 +117,4 @@ div.player > .card-container:hover {
   background-image: url("../Images/Cards/BBACK.png");
   background-size: cover;
   transform: rotateY(180deg);
-}
-
-.hand {
 }

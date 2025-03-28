@@ -1,10 +1,5 @@
 import { crazyEights } from "./crazy-eights.js";
 
-function randomChoice(array) {
-  const randomIndex = Math.floor(Math.random() * array.length);
-  return array[randomIndex];
-}
-
 Array.prototype.shuffle = function () {
   for (let i = this.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -12,6 +7,29 @@ Array.prototype.shuffle = function () {
   }
   return this;
 };
+
+export function randomChoice(array) {
+  const randomIndex = Math.floor(Math.random() * array.length);
+  return array[randomIndex];
+}
+
+export function randBetween(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+export function cardName(card) {
+  card.id.slice(0, card.id.length - 10);
+}
+
+export function correctCardOrder(container) {
+  const cards = container.querySelectorAll(".card-container");
+  let indexTrack = cards.length - 1;
+  for (let i = cards.length; i > 0; i--) {
+    cards[indexTrack].style.zIndex = `${i}`;
+    indexTrack--;
+  }
+  return cards;
+}
 
 export function correctHandVis(hand) {
   let maxWidth;
@@ -115,5 +133,31 @@ const createDeck = function () {
 };
 
 const [deck, deckWithJokers, cardBack] = createDeck();
+
+const populateDeck = function (deck, cardBack) {
+  for (let card of deck) {
+    const parent = document.getElementById("deck");
+    const container = document.createElement("div");
+    const cardPiece = document.createElement("div");
+    const front = document.createElement("div");
+    const back = document.createElement("div");
+
+    container.id = `${card}-container`;
+    container.className = "card-container";
+    container.style.flexShrink = 0;
+    cardPiece.id = card;
+    cardPiece.className = "card";
+    front.id = "front";
+    front.style.backgroundImage = `url("../Images/Cards/${card}.png")`;
+    back.id = "back";
+    back.style.backgroundImage = `url("../Images/Cards/Backs/${cardBack}.png")`;
+
+    parent.appendChild(container);
+    container.appendChild(cardPiece);
+    cardPiece.appendChild(front);
+    cardPiece.appendChild(back);
+  }
+};
+populateDeck(deck, cardBack);
 
 crazyEights(deck, cardBack);
