@@ -41,6 +41,7 @@ const correctCardOrder = (container) => {
 };
 
 const moveCard = function (from, to, card) {
+  console.log(to);
   const cardPicker = document.getElementById(`${cardName(card)}-container`);
   const fromClassList = Array.from(from.classList);
   const toClassList = Array.from(to.classList);
@@ -85,6 +86,36 @@ const moveCard = function (from, to, card) {
   }
 };
 
+const populateDeck = function (deck, cardBack) {
+  const deckDiv = document.getElementById("deck");
+
+  for (let card of deck) {
+    const container = document.createElement("div");
+    const cardPiece = document.createElement("div");
+    const front = document.createElement("div");
+    const back = document.createElement("div");
+
+    container.id = `${card}-container`;
+    container.className = "card-container";
+    container.style.flexShrink = 0;
+    cardPiece.id = card;
+    cardPiece.className = "card";
+    front.id = "front";
+    front.className = "front";
+    front.style.backgroundImage = `url("../Images/Cards/${card}.png")`;
+    back.id = "back";
+    back.className = "back";
+    back.style.backgroundImage = `url("../Images/Cards/Backs/${cardBack}.png")`;
+
+    deckDiv.appendChild(container);
+    container.appendChild(cardPiece);
+    cardPiece.appendChild(front);
+    cardPiece.appendChild(back);
+  }
+
+  return deckDiv;
+};
+
 const createDiscard = function (deckDiv, gameArea) {
   const discard = document.createElement("div");
 
@@ -99,34 +130,108 @@ const createDiscard = function (deckDiv, gameArea) {
   return discard;
 };
 
-const createHands = function (gameArea) {
+const createHands = function (gameArea, numPlayers) {
   const comHands = [];
   const playerHand = document.createElement("div");
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < numPlayers - 1; i++) {
     comHands.push(document.createElement("div"));
   }
 
-  [
-    comHands[0].id,
-    comHands[0].classList,
-    comHands[0].style.maxWidth,
-    comHands[0].style.left,
-  ] = ["com-hand-one", "hand v-hand", "50vh", "0"];
+  switch (numPlayers) {
+    case 2:
+      [
+        comHands[0].id,
+        comHands[0].classList,
+        comHands[0].style.maxWidth,
+        comHands[0].style.top,
+      ] = ["com-hand-two", "hand h-hand", "50vw", "0"];
 
-  [
-    comHands[1].id,
-    comHands[1].classList,
-    comHands[1].style.maxWidth,
-    comHands[1].style.top,
-  ] = ["com-hand-two", "hand h-hand", "50vw", "0"];
+      window.addEventListener("resize", () => {
+        setTimeout(function () {
+          const [playerHand, comHandTwo] = [
+            document.getElementById("player-hand"),
+            document.getElementById("com-hand-two"),
+          ];
+          correctHandVis(playerHand);
+          correctHandVis(comHandTwo);
+        }, 500);
+      });
 
-  [
-    comHands[2].id,
-    comHands[2].classList,
-    comHands[2].style.maxWidth,
-    comHands[2].style.right,
-  ] = ["com-hand-three", "hand v-hand", "50vh", "0"];
+      gameArea.appendChild(comHands[0]);
+      break;
+    case 3:
+      [
+        comHands[0].id,
+        comHands[0].classList,
+        comHands[0].style.maxWidth,
+        comHands[0].style.left,
+      ] = ["com-hand-one", "hand v-hand", "50vh", "0"];
+
+      [
+        comHands[1].id,
+        comHands[1].classList,
+        comHands[1].style.maxWidth,
+        comHands[1].style.right,
+      ] = ["com-hand-three", "hand v-hand", "50vw", "0"];
+
+      window.addEventListener("resize", () => {
+        setTimeout(function () {
+          const [playerHand, comHandOne, comHandThree] = [
+            document.getElementById("player-hand"),
+            document.getElementById("com-hand-one"),
+            document.getElementById("com-hand-three"),
+          ];
+          correctHandVis(playerHand);
+          correctHandVis(comHandOne);
+          correctHandVis(comHandThree);
+        }, 500);
+      });
+
+      gameArea.appendChild(comHands[0]);
+      gameArea.appendChild(comHands[1]);
+      break;
+    case 4:
+      [
+        comHands[0].id,
+        comHands[0].classList,
+        comHands[0].style.maxWidth,
+        comHands[0].style.left,
+      ] = ["com-hand-one", "hand v-hand", "50vh", "0"];
+
+      [
+        comHands[1].id,
+        comHands[1].classList,
+        comHands[1].style.maxWidth,
+        comHands[1].style.top,
+      ] = ["com-hand-two", "hand h-hand", "50vw", "0"];
+
+      [
+        comHands[2].id,
+        comHands[2].classList,
+        comHands[2].style.maxWidth,
+        comHands[2].style.right,
+      ] = ["com-hand-three", "hand v-hand", "50vh", "0"];
+
+      window.addEventListener("resize", () => {
+        setTimeout(function () {
+          const [playerHand, comHandOne, comHandTwo, comHandThree] = [
+            document.getElementById("player-hand"),
+            document.getElementById("com-hand-one"),
+            document.getElementById("com-hand-two"),
+            document.getElementById("com-hand-three"),
+          ];
+          correctHandVis(playerHand);
+          correctHandVis(comHandOne);
+          correctHandVis(comHandTwo);
+          correctHandVis(comHandThree);
+        }, 500);
+      });
+
+      gameArea.appendChild(comHands[0]);
+      gameArea.appendChild(comHands[1]);
+      gameArea.appendChild(comHands[2]);
+  }
 
   [
     playerHand.id,
@@ -193,26 +298,18 @@ const createHands = function (gameArea) {
     }
   });
 
-  window.addEventListener("resize", () => {
-    setTimeout(function () {
-      const [playerHand, comHandOne, comHandTwo, comHandThree] = [
-        document.getElementById("player-hand"),
-        document.getElementById("com-hand-one"),
-        document.getElementById("com-hand-two"),
-        document.getElementById("com-hand-three"),
-      ];
-      correctHandVis(playerHand);
-      correctHandVis(comHandOne);
-      correctHandVis(comHandTwo);
-      correctHandVis(comHandThree);
-    }, 500);
-  });
-
-  gameArea.appendChild(comHands[0]);
-  gameArea.appendChild(comHands[1]);
-  gameArea.appendChild(comHands[2]);
   gameArea.appendChild(playerHand);
-  return [comHands[0], comHands[1], comHands[2], playerHand];
+
+  switch (numPlayers) {
+    case 2:
+      return [comHands[0], playerHand];
+      break;
+    case 3:
+      return [comHands[0], comHands[1], playerHand];
+      break;
+    case 4:
+      return [comHands[0], comHands[1], comHands[2], playerHand];
+  }
 };
 
 const initialDeal = function (
@@ -222,30 +319,68 @@ const initialDeal = function (
   comHandTwo,
   comHandThree,
   discard,
+  numPlayers,
   turnOrder
 ) {
   let cardsInDeck = deck.querySelectorAll(".card-container");
+
   for (let i = 0; i < 7; i++) {
-    if (turnOrder === 1) {
-      moveCard(deck, playerHand, cardsInDeck[0]);
-      moveCard(deck, comHandOne, cardsInDeck[1]);
-      moveCard(deck, comHandTwo, cardsInDeck[2]);
-      moveCard(deck, comHandThree, cardsInDeck[3]);
-    } else if (turnOrder === 2) {
-      moveCard(deck, comHandOne, cardsInDeck[0]);
-      moveCard(deck, comHandTwo, cardsInDeck[1]);
-      moveCard(deck, comHandThree, cardsInDeck[2]);
-      moveCard(deck, playerHand, cardsInDeck[3]);
-    } else if (turnOrder === 3) {
-      moveCard(deck, comHandTwo, cardsInDeck[0]);
-      moveCard(deck, comHandThree, cardsInDeck[1]);
-      moveCard(deck, playerHand, cardsInDeck[2]);
-      moveCard(deck, comHandOne, cardsInDeck[3]);
-    } else if (turnOrder === 4) {
-      moveCard(deck, comHandThree, cardsInDeck[0]);
-      moveCard(deck, playerHand, cardsInDeck[1]);
-      moveCard(deck, comHandOne, cardsInDeck[2]);
-      moveCard(deck, comHandTwo, cardsInDeck[3]);
+    switch (numPlayers) {
+      case 2:
+        switch (turnOrder) {
+          case 1:
+            moveCard(deck, playerHand, cardsInDeck[0]);
+            moveCard(deck, comHandTwo, cardsInDeck[1]);
+            break;
+          case 2:
+            moveCard(deck, comHandTwo, cardsInDeck[0]);
+            moveCard(deck, playerHand, cardsInDeck[1]);
+        }
+        break;
+      case 3:
+        switch (turnOrder) {
+          case 1:
+            moveCard(deck, playerHand, cardsInDeck[0]);
+            moveCard(deck, comHandOne, cardsInDeck[1]);
+            moveCard(deck, comHandThree, cardsInDeck[2]);
+            break;
+          case 2:
+            moveCard(deck, comHandOne, cardsInDeck[0]);
+            moveCard(deck, comHandThree, cardsInDeck[1]);
+            moveCard(deck, playerHand, cardsInDeck[2]);
+            break;
+          case 3:
+            moveCard(deck, comHandThree, cardsInDeck[0]);
+            moveCard(deck, playerHand, cardsInDeck[1]);
+            moveCard(deck, comHandOne, cardsInDeck[2]);
+        }
+        break;
+      case 4:
+        switch (turnOrder) {
+          case 1:
+            moveCard(deck, playerHand, cardsInDeck[0]);
+            moveCard(deck, comHandOne, cardsInDeck[1]);
+            moveCard(deck, comHandTwo, cardsInDeck[2]);
+            moveCard(deck, comHandThree, cardsInDeck[3]);
+            break;
+          case 2:
+            moveCard(deck, comHandOne, cardsInDeck[0]);
+            moveCard(deck, comHandTwo, cardsInDeck[1]);
+            moveCard(deck, comHandThree, cardsInDeck[2]);
+            moveCard(deck, playerHand, cardsInDeck[3]);
+            break;
+          case 3:
+            moveCard(deck, comHandTwo, cardsInDeck[0]);
+            moveCard(deck, comHandThree, cardsInDeck[1]);
+            moveCard(deck, playerHand, cardsInDeck[2]);
+            moveCard(deck, comHandOne, cardsInDeck[3]);
+            break;
+          case 4:
+            moveCard(deck, comHandThree, cardsInDeck[0]);
+            moveCard(deck, playerHand, cardsInDeck[1]);
+            moveCard(deck, comHandOne, cardsInDeck[2]);
+            moveCard(deck, comHandTwo, cardsInDeck[3]);
+        }
     }
 
     cardsInDeck = deck.querySelectorAll(".card-container");
@@ -312,6 +447,7 @@ const playerPlayedEight = async function (cardPlayed, gameArea) {
       await cardClick();
       resolve();
     });
+
     notification.textContent = `CHANGED SUITE TO ${suiteChoice}`;
     setTimeout(function () {
       gameArea.removeChild(notification);
@@ -566,6 +702,22 @@ const comTurn = async function (comHand, deck, discard, gameArea) {
   });
 };
 
+const winner = function (hand, numPlayers, turnOrder, playing) {
+  if (hand.querySelectorAll(".card-container").length != 0) {
+    if (turnOrder < numPlayers) {
+      turnOrder++;
+    } else {
+      turnOrder = 1;
+    }
+    playing = true;
+    return [turnOrder, playing];
+  }
+
+  playing = false;
+  turnOrder = 5;
+  return [turnOrder, playing];
+};
+
 const gamePlay = async function (
   deckDiv,
   playerHand,
@@ -573,66 +725,137 @@ const gamePlay = async function (
   comHandTwo,
   comHandThree,
   discard,
+  numPlayers,
   turnOrder,
   gameArea
 ) {
   let playing = true;
 
   while (playing) {
-    switch (turnOrder) {
-      case 1:
-        await playerTurn(playerHand, deckDiv, discard, gameArea);
-        turnOrder = 2;
-        // if (winner(playerHand)) {
-        //   playing = false;
-        //   winnerFlag(playerHand);
-        // } else {
-        //   turnOrder = 2;
-        // }
-        break;
+    switch (numPlayers) {
       case 2:
-        await comTurn(comHandOne, deckDiv, discard, gameArea);
-        turnOrder = 3;
-        // if (winner(comHandOne)) {
-        //   playing = false;
-        //   winnerFlag(comHandOne);
-        // } else {
-        //   turnOrder = 3;
-        // }
+        switch (turnOrder) {
+          case 1:
+            await playerTurn(playerHand, deckDiv, discard, gameArea);
+            [turnOrder, playing] = winner(
+              playerHand,
+              numPlayers,
+              turnOrder,
+              playing
+            );
+            break;
+          case 2:
+            await comTurn(comHandTwo, deckDiv, discard, gameArea);
+            [turnOrder, playing] = winner(
+              comHandTwo,
+              numPlayers,
+              turnOrder,
+              playing
+            );
+        }
         break;
       case 3:
-        await comTurn(comHandTwo, deckDiv, discard, gameArea);
-        turnOrder = 4;
-        // if (winner(comHandTwo)) {
-        //   playing = false;
-        //   winnerFlag(comHandTwo);
-        // } else {
-        //   turnOrder = 4;
-        // }
+        switch (turnOrder) {
+          case 1:
+            await playerTurn(playerHand, deckDiv, discard, gameArea);
+            [turnOrder, playing] = winner(
+              playerHand,
+              numPlayers,
+              turnOrder,
+              playing
+            );
+            break;
+          case 2:
+            await comTurn(comHandOne, deckDiv, discard, gameArea);
+            [turnOrder, playing] = winner(
+              comHandOne,
+              numPlayers,
+              turnOrder,
+              playing
+            );
+            break;
+          case 3:
+            await comTurn(comHandThree, deckDiv, discard, gameArea);
+            [turnOrder, playing] = winner(
+              comHandThree,
+              numPlayers,
+              turnOrder,
+              playing
+            );
+        }
         break;
       case 4:
-        await comTurn(comHandThree, deckDiv, discard, gameArea);
-        turnOrder = 1;
-      // if (winner(comHandThree)) {
-      //   playing = false;
-      //   winnerFlag(comHandThree);
-      // } else {
-      //   turnOrder = 1;
-      // }
+        switch (turnOrder) {
+          case 1:
+            await playerTurn(playerHand, deckDiv, discard, gameArea);
+            [turnOrder, playing] = winner(
+              playerHand,
+              numPlayers,
+              turnOrder,
+              playing
+            );
+            break;
+          case 2:
+            await comTurn(comHandOne, deckDiv, discard, gameArea);
+            [turnOrder, playing] = winner(
+              comHandOne,
+              numPlayers,
+              turnOrder,
+              playing
+            );
+            break;
+          case 3:
+            await comTurn(comHandTwo, deckDiv, discard, gameArea);
+            [turnOrder, playing] = winner(
+              comHandTwo,
+              numPlayers,
+              turnOrder,
+              playing
+            );
+            break;
+          case 4:
+            await comTurn(comHandThree, deckDiv, discard, gameArea);
+            [turnOrder, playing] = winner(
+              comHandThree,
+              numPlayers,
+              turnOrder,
+              playing
+            );
+        }
     }
   }
 };
 
 export function crazyEights(deck, cardBack) {
   const gameArea = document.getElementById("game-area");
-  const deckDiv = document.getElementById("deck");
-  const discard = createDiscard(deckDiv, gameArea);
-  const [comHandOne, comHandTwo, comHandThree, playerHand] =
-    createHands(gameArea);
-  let turnOrder = randBetween(1, 4);
-
   gameArea.style.backgroundImage = "url('../Images/Backgrounds/CRAZY_BG.png')";
   gameArea.style.backgroundSize = "contain";
+
+  const deckDiv = populateDeck(deck, cardBack);
+  const discard = createDiscard(deckDiv, gameArea);
+  const numPlayers = randBetween(2, 4);
+  let comHandOne;
+  let comHandTwo;
+  let comHandThree;
+  let playerHand;
+
+  switch (numPlayers) {
+    case 2:
+      [comHandTwo, playerHand] = createHands(gameArea, numPlayers);
+      break;
+    case 3:
+      [comHandOne, comHandThree, playerHand] = createHands(
+        gameArea,
+        numPlayers
+      );
+      break;
+    case 4:
+      [comHandOne, comHandTwo, comHandThree, playerHand] = createHands(
+        gameArea,
+        numPlayers
+      );
+  }
+  let turnOrder = randBetween(1, numPlayers);
 
   initialDeal(
     deckDiv,
@@ -641,6 +864,7 @@ export function crazyEights(deck, cardBack) {
     comHandTwo,
     comHandThree,
     discard,
+    numPlayers,
     turnOrder
   );
   gamePlay(
@@ -650,6 +874,7 @@ export function crazyEights(deck, cardBack) {
     comHandTwo,
     comHandThree,
     discard,
+    numPlayers,
     turnOrder,
     gameArea
   );

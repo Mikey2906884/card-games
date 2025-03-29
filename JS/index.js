@@ -139,32 +139,4 @@ const createDeck = function () {
 
 const [deck, deckWithJokers, cardBack] = createDeck();
 
-const populateDeck = function (deck, cardBack) {
-  for (let card of deck) {
-    const parent = document.getElementById("deck");
-    const container = document.createElement("div");
-    const cardPiece = document.createElement("div");
-    const front = document.createElement("div");
-    const back = document.createElement("div");
-
-    container.id = `${card}-container`;
-    container.className = "card-container";
-    container.style.flexShrink = 0;
-    cardPiece.id = card;
-    cardPiece.className = "card";
-    front.id = "front";
-    front.className = "front";
-    front.style.backgroundImage = `url("../Images/Cards/${card}.png")`;
-    back.id = "back";
-    back.className = "back";
-    back.style.backgroundImage = `url("../Images/Cards/Backs/${cardBack}.png")`;
-
-    parent.appendChild(container);
-    container.appendChild(cardPiece);
-    cardPiece.appendChild(front);
-    cardPiece.appendChild(back);
-  }
-};
-populateDeck(deck, cardBack);
-
 crazyEights(deck, cardBack);
