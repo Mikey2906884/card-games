@@ -70,29 +70,34 @@ export function correctHandVis(hand) {
     }
   }
 
-  if (cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth >= maxWidth) {
-    for (let card of cardsInHand) {
-      card.style.marginRight = `-${
-        (card.offsetWidth -
-          (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
-        2
-      }px`;
-      card.style.marginLeft = `-${
-        (card.offsetWidth -
-          (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
-        2
-      }px`;
-    }
-    if (hand.style.left) {
-      hand.style.transform = `rotate(90deg) translate(0, ${
-        (maxWidth - hand.offsetHeight) / 2 +
-        parseFloat(hand.querySelector(".card-container").style.marginRight)
-      }px)`;
-    } else if (hand.style.right) {
-      hand.style.transform = `rotate(90deg) translate(0, -${
-        (maxWidth - hand.offsetHeight) / 2 +
-        parseFloat(hand.querySelector(".card-container").style.marginRight)
-      }px)`;
+  if (cardsInHand.length != 0) {
+    if (
+      cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth >=
+      maxWidth
+    ) {
+      for (let card of cardsInHand) {
+        card.style.marginRight = `-${
+          (card.offsetWidth -
+            (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
+          2
+        }px`;
+        card.style.marginLeft = `-${
+          (card.offsetWidth -
+            (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
+          2
+        }px`;
+      }
+      if (hand.style.left) {
+        hand.style.transform = `rotate(90deg) translate(0, ${
+          (maxWidth - hand.offsetHeight) / 2 +
+          parseFloat(hand.querySelector(".card-container").style.marginRight)
+        }px)`;
+      } else if (hand.style.right) {
+        hand.style.transform = `rotate(90deg) translate(0, -${
+          (maxWidth - hand.offsetHeight) / 2 +
+          parseFloat(hand.querySelector(".card-container").style.marginRight)
+        }px)`;
+      }
     }
   }
 }
@@ -148,8 +153,10 @@ const populateDeck = function (deck, cardBack) {
     cardPiece.id = card;
     cardPiece.className = "card";
     front.id = "front";
+    front.className = "front";
     front.style.backgroundImage = `url("../Images/Cards/${card}.png")`;
     back.id = "back";
+    back.className = "back";
     back.style.backgroundImage = `url("../Images/Cards/Backs/${cardBack}.png")`;
 
     parent.appendChild(container);

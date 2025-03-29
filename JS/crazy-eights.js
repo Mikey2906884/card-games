@@ -1,4 +1,5 @@
 import { randomChoice, randBetween, correctHandVis } from "./index.js";
+var eightsCount = 0;
 
 const cardName = (card) => card.id.slice(0, card.id.length - 10);
 
@@ -253,95 +254,373 @@ const initialDeal = function (
   moveCard(deck, discard, cardsInDeck[0]);
 };
 
-const playedEight = function (suiteChoice, cardPlayed, gameArea) {
-  setTimeout(function () {
+const playerPlayedEight = async function (cardPlayed, gameArea) {
+  eightsCount += 1;
+  await new Promise(async function (resolve) {
     const notification = document.createElement("div");
-    [
-      notification.id,
-      notification.style.position,
-      notification.style.display,
-      notification.style.justifyContent,
-      notification.style.alignItems,
-      notification.style.height,
-      notification.style.width,
-    ] = [
-      "notification",
-      "relative",
-      "flex",
-      "center",
-      "center",
-      "100%",
-      "100%",
-    ];
-  }, 500);
+    const suitesContainer = document.createElement("div");
+    const spades = document.createElement("div");
+    const diamonds = document.createElement("div");
+    const clovers = document.createElement("div");
+    const hearts = document.createElement("div");
+    let suiteChoice;
+
+    spades.className = "♠";
+    diamonds.className = "♦";
+    clovers.className = "♣";
+    hearts.className = "♥";
+    suitesContainer.id = "♠♦♣♥";
+    notification.id = "notification";
+    spades.textContent = "♠";
+    diamonds.textContent = "♦";
+    clovers.textContent = "♣";
+    hearts.textContent = "♥";
+    notification.textContent = "EIGHT PLAYED";
+    gameArea.appendChild(notification);
+
+    async function cardClick() {
+      return new Promise((resolve) => {
+        setTimeout(function () {
+          notification.textContent = "PICK THE NEW SUITE";
+          notification.appendChild(suitesContainer);
+          suitesContainer.appendChild(spades);
+          suitesContainer.appendChild(diamonds);
+          suitesContainer.appendChild(clovers);
+          suitesContainer.appendChild(hearts);
+
+          spades.addEventListener("click", function () {
+            suiteChoice = "♠";
+            resolve();
+          });
+          diamonds.addEventListener("click", function () {
+            suiteChoice = "♦";
+            resolve();
+          });
+          clovers.addEventListener("click", function () {
+            suiteChoice = "♣";
+            resolve();
+          });
+          hearts.addEventListener("click", function () {
+            suiteChoice = "♥";
+            resolve();
+          });
+        }, 2000);
+      });
+    }
+
+    await new Promise(async function (resolve) {
+      await cardClick();
+      resolve();
+    });
+    notification.textContent = `CHANGED SUITE TO ${suiteChoice}`;
+    setTimeout(function () {
+      gameArea.removeChild(notification);
+    }, 2000);
+    setTimeout(function () {
+      [
+        cardPlayed.id,
+        cardPlayed.querySelector(".front").style.backgroundImage,
+      ] = [
+        `8${eightsCount + suiteChoice}-container`,
+        `url("../Images/Cards/8${suiteChoice}.png")`,
+      ];
+      resolve();
+    }, 3000);
+  });
 };
 
-const playerTurn = function (playerHand, discard) {
+const comPlayedEight = async function (suiteChoice, cardPlayed, gameArea) {
+  eightsCount += 1;
+  await new Promise(async function (resolve) {
+    const notification = document.createElement("div");
+    notification.id = "notification";
+    notification.textContent = "EIGHT PLAYED";
+    gameArea.appendChild(notification);
+    setTimeout(function () {
+      notification.textContent = `CHANGED SUITE TO ${suiteChoice}`;
+    }, 2000);
+    setTimeout(function () {
+      gameArea.removeChild(notification);
+    }, 4000);
+    setTimeout(function () {
+      [
+        cardPlayed.id,
+        cardPlayed.querySelector(".front").style.backgroundImage,
+      ] = [
+        `8${eightsCount + suiteChoice}-container`,
+        `url("../Images/Cards/8${suiteChoice}.png")`,
+      ];
+      resolve();
+    }, 5000);
+  });
+};
+
+const playerTurn = async function (playerHand, deck, discard, gameArea) {
   const cardsInHand = playerHand.querySelectorAll(".card-container");
   const topOfDiscard = Array.from(
     discard.querySelectorAll(".card-container")
   ).at(-1);
+  const topOfDeck = Array.from(deck.querySelectorAll(".card-container")).at(-1);
 
-  playerHand.style.boxShadow = "0 0 100px lime";
+  await new Promise(async function (resolve) {
+    setTimeout(function () {
+      playerHand.style.boxShadow = "0 0 200px lime";
+      playerHand.style.backgroundColor = "#00ff0040";
+    }, 1000);
+    resolve();
+  });
+
+  async function cardClick() {
+    return new Promise((resolve) => {
+      setTimeout(function () {
+        let Counter = 0;
+        for (let card of cardsInHand) {
+          if (
+            (cardName(card)[0] === cardName(topOfDiscard)[0] &&
+              cardName(card)[0] != "8") ||
+            (cardName(card).at(-1) === cardName(topOfDiscard).at(-1) &&
+              cardName(card)[0] != "8") ||
+            cardName(card)[0] === "8"
+          ) {
+            Counter++;
+            card.style.bottom = "3vh";
+            card.style.boxShadow = "0 0 25px white";
+          }
+
+          card.clickMe = async function () {
+            if (!card.style.bottom) {
+              card.style.right = "3vh";
+              setTimeout(function () {
+                card.style.right = "-3vh";
+              }, 100);
+              setTimeout(function () {
+                card.style.right = "3vh";
+              }, 200);
+              setTimeout(function () {
+                card.style.right = "-3vh";
+              }, 300);
+              setTimeout(function () {
+                card.style.right = null;
+              }, 400);
+            } else {
+              card.style.bottom = null;
+              card.style.boxShadow = null;
+              moveCard(playerHand, discard, card);
+
+              if (cardName(card)[0] === "8") {
+                await playerPlayedEight(card, gameArea);
+              }
+
+              setTimeout(function () {
+                playerHand.style.boxShadow = null;
+                playerHand.style.backgroundColor = null;
+              }, 1000);
+
+              resolve();
+            }
+          };
+
+          card.addEventListener("click", card.clickMe);
+        }
+        if (Counter === 0) {
+          topOfDeck.style.cursor = "pointer";
+          topOfDeck.style.boxShadow = "0 0 50px red";
+        }
+
+        topOfDeck.clickMe = function () {
+          if (!topOfDeck.style.boxShadow) {
+            topOfDeck.style.right = "3vh";
+            setTimeout(function () {
+              topOfDeck.style.right = "-3vh";
+            }, 100);
+            setTimeout(function () {
+              topOfDeck.style.right = "3vh";
+            }, 200);
+            setTimeout(function () {
+              topOfDeck.style.right = "-3vh";
+            }, 300);
+            setTimeout(function () {
+              topOfDeck.style.right = null;
+            }, 400);
+          } else {
+            moveCard(deck, playerHand, topOfDeck);
+
+            setTimeout(function () {
+              playerHand.style.boxShadow = null;
+              playerHand.style.backgroundColor = null;
+            }, 1000);
+
+            resolve();
+          }
+        };
+
+        topOfDeck.addEventListener("click", topOfDeck.clickMe);
+      }, 1000);
+    });
+  }
+
+  await new Promise(async function (resolve) {
+    await cardClick();
+    for (let card of playerHand.querySelectorAll(".card-container")) {
+      card.removeEventListener("click", card.clickMe);
+      topOfDeck.removeEventListener("click", topOfDeck.clickMe);
+      card.style.bottom = null;
+      card.style.boxShadow = null;
+    }
+    resolve();
+  });
 };
 
-const comTurn = function (comHand, discard) {
+const comTurn = async function (comHand, deck, discard, gameArea) {
   const cardsInHand = comHand.querySelectorAll(".card-container");
   const topOfDiscard = Array.from(
     discard.querySelectorAll(".card-container")
   ).at(-1);
+  const topOfDeck = Array.from(deck.querySelectorAll(".card-container")).at(-1);
 
-  comHand.style.boxShadow = "0 0 100px lime";
+  await new Promise(async function (resolve) {
+    await new Promise(async function (resolve) {
+      setTimeout(function () {
+        comHand.style.boxShadow = "0 0 200px lime";
+        comHand.style.backgroundColor = "#00ff0040";
+      }, 1000);
+      resolve();
+    });
 
-  setTimeout(function () {
-    const playableCards = [];
-    const eights = [];
-    const suiteCounts = [0, 0, 0, 0];
-    let play = null;
-    let playedEight = false;
+    setTimeout(async function () {
+      const playableCards = [];
+      const eights = [];
+      const suiteCounts = [0, 0, 0, 0];
+      let play = null;
 
-    for (let card of cardsInHand) {
-      if (
-        (cardName(card)[0] === cardName(topOfDiscard)[0] &&
-          cardName(card)[0] != "8") ||
-        (cardName(card).at(-1) === cardName(topOfDiscard).at(-1) &&
-          cardName(card)[0] != "8")
-      ) {
-        playableCards.push(card);
-      } else if (cardName(card)[0] === "8") {
-        eights.push(card);
-      } else {
-        switch (cardName(card).at(-1)) {
-          case "♠":
-            suiteCounts[0] += 1;
-            break;
-          case "♦":
-            suiteCounts[1] += 1;
-            break;
-          case "♥":
-            suiteCounts[2] += 1;
-            break;
-          case "♣":
-            suiteCounts[3] += 1;
-            break;
+      for (let card of cardsInHand) {
+        if (
+          (cardName(card)[0] === cardName(topOfDiscard)[0] &&
+            cardName(card)[0] != "8") ||
+          (cardName(card).at(-1) === cardName(topOfDiscard).at(-1) &&
+            cardName(card)[0] != "8")
+        ) {
+          playableCards.push(card);
+        } else if (cardName(card)[0] === "8") {
+          eights.push(card);
+        } else {
+          switch (cardName(card).at(-1)) {
+            case "♠":
+              suiteCounts[0] += 1;
+              break;
+            case "♦":
+              suiteCounts[1] += 1;
+              break;
+            case "♥":
+              suiteCounts[2] += 1;
+              break;
+            case "♣":
+              suiteCounts[3] += 1;
+              break;
+          }
         }
       }
-    }
 
-    if (playableCards.length != 0) {
-      play = randomChoice(playableCards);
-    } else if (eights.length != 0) {
-      play = randomChoice(eights);
-      playedEight = true;
-    }
-
-    if (play != null) {
-      moveCard(comHand, discard, play);
-
-      if (cardName(play)[0] === "8") {
+      if (playableCards.length != 0) {
+        play = randomChoice(playableCards);
+      } else if (eights.length != 0) {
+        play = randomChoice(eights);
       }
+
+      if (play != null) {
+        moveCard(comHand, discard, play);
+
+        if (cardName(play)[0] === "8") {
+          let suiteChoice;
+          const highestSuiteCount = suiteCounts.indexOf(
+            Math.max(...suiteCounts)
+          );
+
+          switch (highestSuiteCount) {
+            case 0:
+              suiteChoice = "♠";
+              break;
+            case 1:
+              suiteChoice = "♦";
+              break;
+            case 2:
+              suiteChoice = "♥";
+              break;
+            case 3:
+              suiteChoice = "♣";
+          }
+
+          await comPlayedEight(suiteChoice, play, gameArea);
+        }
+      } else {
+        moveCard(deck, comHand, topOfDeck);
+      }
+
+      setTimeout(function () {
+        comHand.style.boxShadow = null;
+        comHand.style.backgroundColor = null;
+      }, 1000);
+
+      resolve();
+    }, 2000);
+  });
+};
+
+const gamePlay = async function (
+  deckDiv,
+  playerHand,
+  comHandOne,
+  comHandTwo,
+  comHandThree,
+  discard,
+  turnOrder,
+  gameArea
+) {
+  let playing = true;
+
+  while (playing) {
+    switch (turnOrder) {
+      case 1:
+        await playerTurn(playerHand, deckDiv, discard, gameArea);
+        turnOrder = 2;
+        // if (winner(playerHand)) {
+        //   playing = false;
+        //   winnerFlag(playerHand);
+        // } else {
+        //   turnOrder = 2;
+        // }
+        break;
+      case 2:
+        await comTurn(comHandOne, deckDiv, discard, gameArea);
+        turnOrder = 3;
+        // if (winner(comHandOne)) {
+        //   playing = false;
+        //   winnerFlag(comHandOne);
+        // } else {
+        //   turnOrder = 3;
+        // }
+        break;
+      case 3:
+        await comTurn(comHandTwo, deckDiv, discard, gameArea);
+        turnOrder = 4;
+        // if (winner(comHandTwo)) {
+        //   playing = false;
+        //   winnerFlag(comHandTwo);
+        // } else {
+        //   turnOrder = 4;
+        // }
+        break;
+      case 4:
+        await comTurn(comHandThree, deckDiv, discard, gameArea);
+        turnOrder = 1;
+      // if (winner(comHandThree)) {
+      //   playing = false;
+      //   winnerFlag(comHandThree);
+      // } else {
+      //   turnOrder = 1;
+      // }
     }
-  }, 2000);
+  }
 };
 
 export function crazyEights(deck, cardBack) {
@@ -350,8 +629,7 @@ export function crazyEights(deck, cardBack) {
   const discard = createDiscard(deckDiv, gameArea);
   const [comHandOne, comHandTwo, comHandThree, playerHand] =
     createHands(gameArea);
-  const turnOrder = randBetween(1, 4);
-  let playing = true;
+  let turnOrder = randBetween(1, 4);
 
   gameArea.style.backgroundImage = "url('../Images/Backgrounds/CRAZY_BG.png')";
   gameArea.style.backgroundSize = "contain";
@@ -365,44 +643,14 @@ export function crazyEights(deck, cardBack) {
     discard,
     turnOrder
   );
-
-  while (playing) {
-    switch (turnOrder) {
-      case 1:
-        playerTurn(playerHand, discard);
-        if (winner(playerHand)) {
-          playing = false;
-          winnerFlag(playerHand);
-        } else {
-          turnOrder = 2;
-        }
-        break;
-      case 2:
-        comTurn(comHandOne, discard);
-        if (winner(comHandOne)) {
-          playing = false;
-          winnerFlag(comHandOne);
-        } else {
-          turnOrder = 3;
-        }
-        break;
-      case 3:
-        comTurn(comHandTwo, discard);
-        if (winner(comHandTwo)) {
-          playing = false;
-          winnerFlag(comHandTwo);
-        } else {
-          turnOrder = 4;
-        }
-        break;
-      case 4:
-        comTurn(comHandThree, discard);
-        if (winner(comHandThree)) {
-          playing = false;
-          winnerFlag(comHandThree);
-        } else {
-          turnOrder = 1;
-        }
-    }
-  }
+  gamePlay(
+    deckDiv,
+    playerHand,
+    comHandOne,
+    comHandTwo,
+    comHandThree,
+    discard,
+    turnOrder,
+    gameArea
+  );
 }
