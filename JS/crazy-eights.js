@@ -172,7 +172,7 @@ const createHands = function (gameArea, numPlayers) {
         comHands[1].classList,
         comHands[1].style.maxWidth,
         comHands[1].style.right,
-      ] = ["com-hand-three", "hand v-hand", "50vw", "0"];
+      ] = ["com-hand-three", "hand v-hand", "50vh", "0"];
 
       window.addEventListener("resize", () => {
         setTimeout(function () {

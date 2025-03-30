@@ -153,14 +153,14 @@ const mainMenu = async function (gameArea) {
   optionsBox.className = "options-box";
   gameSelector.className = "game-select";
   gameSelectorHover.className = "hover-select";
-  gameSelectorHover.textContent = "SELECT GAME";
+  gameSelectorHover.textContent = "SELECT GAME▼";
   selectContent.className = "game-select-content";
   numPlayersSelector.className = "game-select";
   numPlayersSelectorHover.className = "hover-select";
-  numPlayersSelectorHover.textContent = "# PLAYERS: 2";
+  numPlayersSelectorHover.textContent = "# PLAYERS:";
   numPlayersContent.className = "num-select-content";
   launchGame.className = "launch-button";
-  launchGame.textContent = "START GAME >";
+  launchGame.textContent = "START GAME ►";
 
   gameArea.appendChild(notification);
   notification.appendChild(optionsBox);
@@ -175,7 +175,12 @@ const mainMenu = async function (gameArea) {
   const gameOptions = [
     { value: "crazy-eights", text: "CRAZY EIGHTS" },
     { value: "go-fish", text: "GO FISH (COMING SOON)" },
+    { value: "old-maid", text: "OLD MAID (COMING SOON)" },
+    { value: "solitaire", text: "SOLITAIRE (COMING SOON)" },
+    { value: "kings-corners", text: "KINGS CORNERS (COMING SOON)" },
   ];
+
+  let numPlayerOptions;
 
   gameOptions.forEach((option) => {
     const optionElement = document.createElement("div");
@@ -183,28 +188,29 @@ const mainMenu = async function (gameArea) {
     optionElement.textContent = option.text;
     if (!optionElement.textContent.includes("(COMING SOON)")) {
       optionElement.addEventListener("click", function () {
-        gameSelectorHover.textContent = optionElement.textContent;
+        gameSelectorHover.textContent = `${optionElement.textContent}▼`;
+        numPlayersSelectorHover.textContent = "# PLAYERS: 2";
+
+        numPlayerOptions = ["2", "3", "4"];
+
+        numPlayerOptions.forEach((option) => {
+          const optionElement = document.createElement("div");
+          optionElement.id = option;
+          optionElement.textContent = option;
+          optionElement.addEventListener("click", function () {
+            numPlayersSelectorHover.textContent = `# PLAYERS: ${option}`;
+          });
+          numPlayersContent.appendChild(optionElement);
+        });
       });
     }
     selectContent.appendChild(optionElement);
   });
 
-  const numPlayerOptions = ["2", "3", "4"];
-
-  numPlayerOptions.forEach((option) => {
-    const optionElement = document.createElement("div");
-    optionElement.id = option;
-    optionElement.textContent = option;
-    optionElement.addEventListener("click", function () {
-      numPlayersSelectorHover.textContent = `# PLAYERS: ${option}`;
-    });
-    numPlayersContent.appendChild(optionElement);
-  });
-
   async function cardClick() {
     return new Promise((resolve) => {
       launchGame.addEventListener("click", function () {
-        if (gameSelectorHover.textContent === "CRAZY EIGHTS") {
+        if (gameSelectorHover.textContent === "CRAZY EIGHTS▼") {
           crazyEights(
             deck,
             cardBack,
