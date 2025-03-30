@@ -137,7 +137,7 @@ div.player > .card-container:hover {
 }
 
 .notification {
-  gap: 20vh;
+  gap: 25vh;
 }
 
 .options-box {
@@ -173,7 +173,7 @@ div.player > .card-container:hover {
   display: none;
   position: absolute;
   background-color: rgba(0, 0, 0, 0.5);
-  max-height: 20vh;
+  max-height: 25vh;
   overflow-y: auto;
 }
 
@@ -185,13 +185,6 @@ div.player > .card-container:hover {
 .num-select-content {
   width: 100%;
   text-align: center;
-}
-
-.game-select-content div:hover,
-.num-select-content div:hover,
-.launch-button:hover {
-  cursor: pointer;
-  color: white;
 }
 
 .game-select:hover .game-select-content,
@@ -228,7 +221,19 @@ div.player > .card-container:hover {
 .♥:hover,
 .♣:hover,
 .play-again:hover,
-.main-menu:hover {
+.main-menu:hover,
+.game-select-content div:hover,
+.num-select-content div:hover,
+.launch-button:hover,
+#back-to-main:hover {
   cursor: pointer;
   color: white;
+}
+
+#back-to-main {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.75);
+  top: 0;
+  left: 0;
+  padding: 1vw;
 }

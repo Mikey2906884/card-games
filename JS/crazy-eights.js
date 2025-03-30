@@ -657,7 +657,32 @@ const comTurn = async function (comHand, deck, discard, gameArea) {
       }
 
       if (playableCards.length != 0) {
-        play = randomChoice(playableCards);
+        const cardScores = [];
+
+        for (let card of playableCards) {
+          let score = 0;
+
+          if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+            score += 10;
+          } else if (cardName(card)[0] === "A") {
+            score += 1;
+          } else {
+            score += parseInt(cardName(card)[0]);
+          }
+
+          for (let secondCard of playableCards) {
+            if (
+              cardName(secondCard).at(-1) === cardName(card).at(-1) &&
+              cardName(secondCard)[0] != "8"
+            ) {
+              score += 1;
+            }
+          }
+
+          cardScores.push(score);
+        }
+
+        play = playableCards[cardScores.indexOf(Math.max(...cardScores))];
       } else if (eights.length != 0) {
         play = randomChoice(eights);
       }
@@ -758,6 +783,7 @@ const winner = async function (
           optionsContainer.appendChild(mainMenu);
 
           playAgain.addEventListener("click", function () {
+            deck.shuffle();
             crazyEights(deck, cardBack, numPlayers);
             resolve;
           });
@@ -790,6 +816,17 @@ const gamePlay = async function (
   deck,
   cardBack
 ) {
+  const backToMain = document.createElement("div");
+  backToMain.id = "back-to-main";
+  backToMain.textContent = "◄ BACK TO MAIN";
+
+  backToMain.addEventListener("click", function () {
+    gameArea.style.backgroundImage = null;
+    startUp();
+  });
+
+  gameArea.appendChild(backToMain);
+
   let playing = true;
 
   while (playing) {
@@ -932,7 +969,7 @@ export function crazyEights(deck, cardBack, numPlayers) {
   gameArea.appendChild(deckDiv);
 
   gameArea.style.backgroundImage = "url('../Images/Backgrounds/CRAZY_BG.png')";
-  gameArea.style.backgroundSize = "contain";
+  gameArea.style.backgroundSize = "cover";
 
   deckDiv = populateDeck(deck, cardBack);
   const discard = createDiscard(deckDiv, gameArea);

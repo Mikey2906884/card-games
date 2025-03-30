@@ -189,19 +189,22 @@ const mainMenu = async function (gameArea) {
     if (!optionElement.textContent.includes("(COMING SOON)")) {
       optionElement.addEventListener("click", function () {
         gameSelectorHover.textContent = `${optionElement.textContent}▼`;
-        numPlayersSelectorHover.textContent = "# PLAYERS: 2";
 
-        numPlayerOptions = ["2", "3", "4"];
+        if (numPlayersSelectorHover.textContent.at(-1) != 2) {
+          numPlayersSelectorHover.textContent = "# PLAYERS: 2";
 
-        numPlayerOptions.forEach((option) => {
-          const optionElement = document.createElement("div");
-          optionElement.id = option;
-          optionElement.textContent = option;
-          optionElement.addEventListener("click", function () {
-            numPlayersSelectorHover.textContent = `# PLAYERS: ${option}`;
+          numPlayerOptions = ["2", "3", "4"];
+
+          numPlayerOptions.forEach((option) => {
+            const optionElement = document.createElement("div");
+            optionElement.id = option;
+            optionElement.textContent = option;
+            optionElement.addEventListener("click", function () {
+              numPlayersSelectorHover.textContent = `# PLAYERS: ${option}`;
+            });
+            numPlayersContent.appendChild(optionElement);
           });
-          numPlayersContent.appendChild(optionElement);
-        });
+        }
       });
     }
     selectContent.appendChild(optionElement);
@@ -211,6 +214,7 @@ const mainMenu = async function (gameArea) {
     return new Promise((resolve) => {
       launchGame.addEventListener("click", function () {
         if (gameSelectorHover.textContent === "CRAZY EIGHTS▼") {
+          deck.shuffle();
           crazyEights(
             deck,
             cardBack,
