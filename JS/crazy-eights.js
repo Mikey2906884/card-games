@@ -1,4 +1,4 @@
-import { randomChoice, randBetween, correctHandVis } from "./index.js";
+import { randomChoice, randBetween, correctHandVis, startUp } from "./index.js";
 var eightsCount = 0;
 
 const cardName = (card) => card.id.slice(0, card.id.length - 10);
@@ -41,7 +41,6 @@ const correctCardOrder = (container) => {
 };
 
 const moveCard = function (from, to, card) {
-  console.log(to);
   const cardPicker = document.getElementById(`${cardName(card)}-container`);
   const fromClassList = Array.from(from.classList);
   const toClassList = Array.from(to.classList);
@@ -702,7 +701,27 @@ const comTurn = async function (comHand, deck, discard, gameArea) {
   });
 };
 
-const winner = function (hand, numPlayers, turnOrder, playing) {
+const deckCheck = function (deck, discard) {
+  if (deck.querySelectorAll(".card-container").length === 0) {
+    for (let card of discard.querySelectorAll(".card-container")) {
+      if (
+        card != Array.from(discard.querySelectorAll(".card-container")).at(-1)
+      ) {
+        moveCard(discard, deck, card);
+      }
+    }
+  }
+};
+
+const winner = async function (
+  hand,
+  numPlayers,
+  turnOrder,
+  playing,
+  deck,
+  cardBack,
+  gameArea
+) {
   if (hand.querySelectorAll(".card-container").length != 0) {
     if (turnOrder < numPlayers) {
       turnOrder++;
@@ -711,11 +730,51 @@ const winner = function (hand, numPlayers, turnOrder, playing) {
     }
     playing = true;
     return [turnOrder, playing];
-  }
+  } else {
+    const notification = document.createElement("div");
+    const optionsContainer = document.createElement("div");
+    const playAgain = document.createElement("div");
+    const mainMenu = document.createElement("div");
 
-  playing = false;
-  turnOrder = 5;
-  return [turnOrder, playing];
+    playAgain.className = "play-again";
+    mainMenu.className = "main-menu";
+    optionsContainer.id = "♠♦♣♥";
+    notification.id = "notification";
+    playAgain.textContent = "PLAY AGAIN";
+    mainMenu.textContent = "MAIN MENU >";
+
+    if (hand.id.startsWith("com")) {
+      notification.textContent = "COMPUTER WINS!";
+    } else {
+      notification.textContent = "YOU WIN!";
+    }
+    gameArea.appendChild(notification);
+
+    async function cardClick() {
+      return new Promise((resolve) => {
+        setTimeout(function () {
+          notification.appendChild(optionsContainer);
+          optionsContainer.appendChild(playAgain);
+          optionsContainer.appendChild(mainMenu);
+
+          playAgain.addEventListener("click", function () {
+            crazyEights(deck, cardBack, numPlayers);
+            resolve;
+          });
+          mainMenu.addEventListener("click", function () {
+            gameArea.style.backgroundImage = null;
+            startUp();
+            resolve();
+          });
+        }, 2000);
+      });
+    }
+
+    await new Promise(async function (resolve) {
+      await cardClick();
+      resolve();
+    });
+  }
 };
 
 const gamePlay = async function (
@@ -727,7 +786,9 @@ const gamePlay = async function (
   discard,
   numPlayers,
   turnOrder,
-  gameArea
+  gameArea,
+  deck,
+  cardBack
 ) {
   let playing = true;
 
@@ -737,103 +798,144 @@ const gamePlay = async function (
         switch (turnOrder) {
           case 1:
             await playerTurn(playerHand, deckDiv, discard, gameArea);
-            [turnOrder, playing] = winner(
+            [turnOrder, playing] = await winner(
               playerHand,
               numPlayers,
               turnOrder,
-              playing
+              playing,
+              deck,
+              cardBack,
+              gameArea
             );
+            deckCheck(deckDiv, discard);
             break;
           case 2:
             await comTurn(comHandTwo, deckDiv, discard, gameArea);
-            [turnOrder, playing] = winner(
+            [turnOrder, playing] = await winner(
               comHandTwo,
               numPlayers,
               turnOrder,
-              playing
+              playing,
+              deck,
+              cardBack,
+              gameArea
             );
+            deckCheck(deckDiv, discard);
         }
         break;
       case 3:
         switch (turnOrder) {
           case 1:
             await playerTurn(playerHand, deckDiv, discard, gameArea);
-            [turnOrder, playing] = winner(
+            [turnOrder, playing] = await winner(
               playerHand,
               numPlayers,
               turnOrder,
-              playing
+              playing,
+              deck,
+              cardBack,
+              gameArea
             );
+            deckCheck(deckDiv, discard);
             break;
           case 2:
             await comTurn(comHandOne, deckDiv, discard, gameArea);
-            [turnOrder, playing] = winner(
+            [turnOrder, playing] = await winner(
               comHandOne,
               numPlayers,
               turnOrder,
-              playing
+              playing,
+              deck,
+              cardBack,
+              gameArea
             );
+            deckCheck(deckDiv, discard);
             break;
           case 3:
             await comTurn(comHandThree, deckDiv, discard, gameArea);
-            [turnOrder, playing] = winner(
+            [turnOrder, playing] = await winner(
               comHandThree,
               numPlayers,
               turnOrder,
-              playing
+              playing,
+              deck,
+              cardBack,
+              gameArea
             );
+            deckCheck(deckDiv, discard);
         }
         break;
       case 4:
         switch (turnOrder) {
           case 1:
             await playerTurn(playerHand, deckDiv, discard, gameArea);
-            [turnOrder, playing] = winner(
+            [turnOrder, playing] = await winner(
               playerHand,
               numPlayers,
               turnOrder,
-              playing
+              playing,
+              deck,
+              cardBack,
+              gameArea
             );
+            deckCheck(deckDiv, discard);
             break;
           case 2:
             await comTurn(comHandOne, deckDiv, discard, gameArea);
-            [turnOrder, playing] = winner(
+            [turnOrder, playing] = await winner(
               comHandOne,
               numPlayers,
               turnOrder,
-              playing
+              playing,
+              deck,
+              cardBack,
+              gameArea
             );
+            deckCheck(deckDiv, discard);
             break;
           case 3:
             await comTurn(comHandTwo, deckDiv, discard, gameArea);
-            [turnOrder, playing] = winner(
+            [turnOrder, playing] = await winner(
               comHandTwo,
               numPlayers,
               turnOrder,
-              playing
+              playing,
+              deck,
+              cardBack,
+              gameArea
             );
+            deckCheck(deckDiv, discard);
             break;
           case 4:
             await comTurn(comHandThree, deckDiv, discard, gameArea);
-            [turnOrder, playing] = winner(
+            [turnOrder, playing] = await winner(
               comHandThree,
               numPlayers,
               turnOrder,
-              playing
+              playing,
+              deck,
+              cardBack,
+              gameArea
             );
+            deckCheck(deckDiv, discard);
         }
     }
   }
 };
 
-export function crazyEights(deck, cardBack) {
+export function crazyEights(deck, cardBack, numPlayers) {
   const gameArea = document.getElementById("game-area");
+  let deckDiv = document.createElement("div");
+  deckDiv.id = "deck";
+  deckDiv.className = "deck";
+  gameArea.innerHTML = "";
+  gameArea.appendChild(deckDiv);
+
   gameArea.style.backgroundImage = "url('../Images/Backgrounds/CRAZY_BG.png')";
   gameArea.style.backgroundSize = "contain";
 
-  const deckDiv = populateDeck(deck, cardBack);
+  deckDiv = populateDeck(deck, cardBack);
   const discard = createDiscard(deckDiv, gameArea);
-  const numPlayers = randBetween(2, 4);
   let comHandOne;
   let comHandTwo;
   let comHandThree;
@@ -876,6 +978,8 @@ export function crazyEights(deck, cardBack) {
     discard,
     numPlayers,
     turnOrder,
-    gameArea
+    gameArea,
+    deck,
+    cardBack
   );
 }
