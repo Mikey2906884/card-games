@@ -1,4 +1,4 @@
-import { crazyEights } from "./crazy-eights.js";
+import { crazyEights, correctCardOrderEights } from "./crazy-eights.js";
 
 Array.prototype.shuffle = function () {
   for (let i = this.length - 1; i > 0; i--) {
@@ -21,19 +21,10 @@ export function cardName(card) {
   card.id.slice(0, card.id.length - 10);
 }
 
-export function correctCardOrder(container) {
-  const cards = container.querySelectorAll(".card-container");
-  let indexTrack = cards.length - 1;
-  for (let i = cards.length; i > 0; i--) {
-    cards[indexTrack].style.zIndex = `${i}`;
-    indexTrack--;
-  }
-  return cards;
-}
-
 export function correctHandVis(hand) {
   let maxWidth;
   const cardsInHand = hand.querySelectorAll(".card-container");
+  correctCardOrderEights(hand);
 
   if (Array.from(hand.classList).includes("h-hand")) {
     maxWidth = (parseFloat(hand.style.maxWidth) / 100) * window.innerWidth;

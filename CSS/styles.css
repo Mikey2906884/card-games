@@ -12,7 +12,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 3vh;
   font-weight: bold;
-  background-color: green;
+  background-color: lime;
   justify-content: center;
   align-items: center;
 }
@@ -174,6 +174,7 @@ div.player > .card-container:hover {
   position: absolute;
   background-color: rgba(0, 0, 0, 0.5);
   max-height: 25vh;
+  width: 100%;
   overflow-y: auto;
 }
 
@@ -235,5 +236,12 @@ div.player > .card-container:hover {
   color: rgba(255, 255, 255, 0.75);
   top: 0;
   left: 0;
-  padding: 1vw;
+  padding: 1vh;
+  font-size: 2vw;
+}
+
+#game-area {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
