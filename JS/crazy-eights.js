@@ -371,7 +371,7 @@ const initialDeal = function (
 ) {
   let cardsInDeck = deck.querySelectorAll(".card-container");
 
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 5; i++) {
     switch (numPlayers) {
       case 2:
         switch (turnOrder) {
