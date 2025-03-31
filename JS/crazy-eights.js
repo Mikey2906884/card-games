@@ -1,6 +1,14 @@
 import { randomChoice, randBetween, correctHandVis, startUp } from "./index.js";
 var eightsCount = 0;
 
+Array.prototype.shuffle = function () {
+  for (let i = this.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [this[i], this[j]] = [this[j], this[i]];
+  }
+  return this;
+};
+
 const cardName = (card) => card.id.slice(0, card.id.length - 10);
 
 export function correctCardOrderEights(container) {
@@ -599,6 +607,7 @@ const playerTurn = async function (playerHand, deck, discard, gameArea) {
                 playerHand.style.backgroundColor = null;
               }, 1000);
 
+              card.removeEventListener("click", card.clickMe);
               resolve();
             }
           };
@@ -895,14 +904,25 @@ const comTurn = async function (comHand, deck, discard, gameArea) {
   });
 };
 
-const deckCheck = function (deck, discard) {
+const deckCheck = async function (deck, discard) {
   if (deck.querySelectorAll(".card-container").length === 0) {
-    for (let card of discard.querySelectorAll(".card-container")) {
-      if (
-        card != Array.from(discard.querySelectorAll(".card-container")).at(-1)
-      ) {
-        moveCard(discard, deck, card);
+    await new Promise(function (resolve) {
+      for (let card of discard.querySelectorAll(".card-container")) {
+        if (
+          card != Array.from(discard.querySelectorAll(".card-container")).at(-1)
+        ) {
+          moveCard(discard, deck, card);
+        } else {
+          resolve();
+        }
       }
+    });
+    const deckArray = Array.from(deck.querySelectorAll(".card-container"));
+    deckArray.shuffle();
+
+    for (let card of deckArray) {
+      deck.removeChild(card);
+      deck.appendChild(card);
     }
   }
 };
