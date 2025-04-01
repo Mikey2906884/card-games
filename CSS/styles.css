@@ -62,7 +62,11 @@ body {
   aspect-ratio: 3 / 4;
   perspective: 20vw;
   border-radius: 10px;
-  transition: all 0.5s;
+  transition: ease-in-out 0.75s;
+}
+
+.card {
+  transition: ease-in-out 0.75s;
 }
 
 @media (orientation: landscape) {
@@ -129,15 +133,20 @@ div.player > .card-container:hover {
   align-items: center;
   height: 100%;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.65);
   color: rgba(255, 255, 255, 0.75);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 5vw;
   z-index: 100;
+  gap: 5vh;
 }
 
-.notification {
+#notification.notification {
   gap: 25vh;
+}
+
+#results {
+  align-self: flex-start;
 }
 
 .options-box {
@@ -176,10 +185,6 @@ div.player > .card-container:hover {
   max-height: 25vh;
   width: 100%;
   overflow-y: auto;
-}
-
-.game-select-content,
-.num-select-content {
   border-radius: 2vh;
 }
 
@@ -206,7 +211,6 @@ div.player > .card-container:hover {
   justify-content: center;
   gap: 10vw;
   width: 100%;
-  padding-top: 5vh;
 }
 
 .♠,
@@ -226,7 +230,8 @@ div.player > .card-container:hover {
 .game-select-content div:hover,
 .num-select-content div:hover,
 .launch-button:hover,
-#back-to-main:hover {
+#back-to-main:hover,
+#continuer:hover {
   cursor: pointer;
   color: white;
 }
@@ -244,4 +249,11 @@ div.player > .card-container:hover {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+}
+
+#continuer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 3vh;
 }

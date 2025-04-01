@@ -1,5 +1,7 @@
 import { randomChoice, randBetween, correctHandVis, startUp } from "./index.js";
 var eightsCount = 0;
+var roundTracker = 1;
+var pointsTracker = [];
 
 Array.prototype.shuffle = function () {
   for (let i = this.length - 1; i > 0; i--) {
@@ -11,7 +13,7 @@ Array.prototype.shuffle = function () {
 
 const cardName = (card) => card.id.slice(0, card.id.length - 10);
 
-export function correctCardOrderEights(container) {
+export function correctCardOrder(container) {
   const cards = container.querySelectorAll(".card-container");
   let indexTrack = cards.length - 1;
   for (let i = cards.length; i > 0; i--) {
@@ -47,27 +49,69 @@ export function correctCardOrderEights(container) {
   }
 }
 
-const moveCard = function (from, to, card) {
-  const cardPicker = document.getElementById(`${cardName(card)}-container`);
+const moveCard = async function (from, to, card) {
   const fromClassList = Array.from(from.classList);
   const toClassList = Array.from(to.classList);
 
-  from.removeChild(cardPicker);
-  to.appendChild(cardPicker);
-  correctCardOrderEights(to);
+  card.style.display = "none";
+
+  from.removeChild(card);
+  to.appendChild(card);
+  correctCardOrder(to);
+
+  await new Promise((resolve) => {
+    card.style.display = null;
+    card.style.position = "fixed";
+
+    if (from.id === "com-hand-three") {
+      card.style.top = `${from.offsetTop}px`;
+      card.style.left = `${
+        from.offsetLeft + from.offsetWidth - card.offsetWidth
+      }px`;
+    } else {
+      card.style.top = `${from.offsetTop}px`;
+      card.style.left = `${from.offsetLeft}px`;
+    }
+
+    setTimeout(function () {
+      if (to.id === "com-hand-three") {
+        card.style.top = `${to.offsetTop}px`;
+        card.style.right = `0`;
+      } else {
+        card.style.top = `${to.offsetTop}px`;
+        card.style.left = `${to.offsetLeft}px`;
+      }
+      if (from.id != "player-hand") {
+        card.querySelector(".card").style.transform = `rotateX(${
+          card.querySelector(".card").style.transform === "rotateX(180deg)"
+            ? "0"
+            : "180"
+        }deg)`;
+        if (toClassList.includes("discard")) {
+          card.querySelector(".card").style.transform =
+            "rotateY(0deg) rotateZ(180deg)";
+        }
+      }
+      if (toClassList.includes("player")) {
+        card.querySelector(".card").style.transform =
+          "rotateY(0deg) rotateZ(-180deg)";
+      }
+    }, 100);
+
+    setTimeout(function () {
+      card.style.top = null;
+      card.style.left = null;
+      card.style.right = null;
+      resolve();
+    }, 750);
+  });
 
   if (fromClassList.includes("hand")) {
     correctHandVis(from);
   }
 
-  if (fromClassList.includes("discard")) {
-    card.querySelector(".card").style.transform = "rotateY(180deg)";
-  }
-
   if (toClassList.includes("hand")) {
     if (toClassList.includes("player")) {
-      card.querySelector(".card").style.transform = "rotateY(0deg)";
-
       if (cardName(card)[0] === "8") {
         card.style.order = "-1";
       } else if (cardName(card).at(-1) === "♦") {
@@ -133,10 +177,6 @@ const moveCard = function (from, to, card) {
     correctHandVis(to);
   } else if (toClassList.includes("deck")) {
     card.style.position = "absolute";
-
-    if (toClassList.includes("discard")) {
-      card.querySelector(".card").style.transform = "rotateY(0deg)";
-    }
   }
 };
 
@@ -646,9 +686,8 @@ const playerTurn = async function (playerHand, deck, discard, gameArea) {
             !(cardName(topOfDeck)[0] === "8")
           ) {
             moveCard(deck, playerHand, topOfDeck);
-            deckCheck(deck, discard);
+            await deckCheck(deck, discard);
             topOfDeck.style.boxShadow = null;
-            topOfDeck.removeEventListener("click", topOfDeck.clickMe);
 
             let double = topOfDeck.clickMe;
 
@@ -675,7 +714,7 @@ const playerTurn = async function (playerHand, deck, discard, gameArea) {
               }
 
               resolve();
-            }, 1000);
+            }, 2000);
 
             setTimeout(function () {
               playerHand.style.boxShadow = null;
@@ -929,9 +968,12 @@ const deckCheck = async function (deck, discard) {
 
 const winner = async function (
   hand,
+  playerHand,
+  comHandOne,
+  comHandTwo,
+  comHandThree,
   numPlayers,
   turnOrder,
-  playing,
   deck,
   cardBack,
   gameArea
@@ -942,52 +984,231 @@ const winner = async function (
     } else {
       turnOrder = 1;
     }
-    playing = true;
-    return [turnOrder, playing];
+    return turnOrder;
   } else {
     const notification = document.createElement("div");
     const optionsContainer = document.createElement("div");
     const playAgain = document.createElement("div");
     const mainMenu = document.createElement("div");
+    const resultsContainer = document.createElement("div");
+    const playerResults = document.createElement("div");
+    const comOneResults = document.createElement("div");
+    const comTwoResults = document.createElement("div");
+    const comThreeResults = document.createElement("div");
+    const continuer = document.createElement("div");
 
     playAgain.className = "play-again";
     mainMenu.className = "main-menu";
     optionsContainer.id = "♠♦♣♥";
     notification.id = "notification";
+    continuer.id = "continuer";
+    resultsContainer.id = "results";
     playAgain.textContent = "PLAY AGAIN";
-    mainMenu.textContent = "MAIN MENU >";
+    mainMenu.textContent = "MAIN MENU ►";
+    continuer.textContent = "NEXT ROUND ►";
 
-    if (hand.id.startsWith("com")) {
-      notification.textContent = "COMPUTER WINS!";
-    } else {
-      notification.textContent = "YOU WIN!";
-    }
-    gameArea.appendChild(notification);
-
-    async function cardClick() {
-      return new Promise((resolve) => {
+    async function roundFinish() {
+      return new Promise(function () {
         setTimeout(function () {
-          notification.appendChild(optionsContainer);
-          optionsContainer.appendChild(playAgain);
-          optionsContainer.appendChild(mainMenu);
+          notification.appendChild(resultsContainer);
+          resultsContainer.appendChild(comOneResults);
+          resultsContainer.appendChild(comTwoResults);
+          resultsContainer.appendChild(comThreeResults);
+          resultsContainer.appendChild(playerResults);
 
-          playAgain.addEventListener("click", function () {
-            deck.shuffle();
-            crazyEights(deck, cardBack, numPlayers);
-            resolve;
-          });
-          mainMenu.addEventListener("click", function () {
-            gameArea.style.backgroundImage = null;
-            gameArea.style.backgroundColor = null;
-            startUp();
-            resolve();
-          });
+          if (roundTracker != 1) {
+            notification.appendChild(continuer);
+            continuer.addEventListener("click", function () {
+              deck.shuffle();
+              roundTracker++;
+              crazyEights(deck, cardBack, numPlayers);
+            });
+          } else {
+            setTimeout(function () {
+              switch (numPlayers) {
+                case 2:
+                  if (pointsTracker[0] === Math.min(...pointsTracker)) {
+                    notification.textContent = "COMPUTER 1 WINS!";
+                  } else {
+                    notification.textContent = "YOU WIN!";
+                  }
+                  break;
+                case 3:
+                  if (pointsTracker[0] === Math.min(...pointsTracker)) {
+                    notification.textContent = "COMPUTER 1 WINS!";
+                  } else if (pointsTracker[1] === Math.min(...pointsTracker)) {
+                    notification.textContent = "COMPUTER 2 WINS!";
+                  } else {
+                    notification.textContent = "YOU WIN!";
+                  }
+                  break;
+                case 4:
+                  if (pointsTracker[0] === Math.min(...pointsTracker)) {
+                    notification.textContent = "COMPUTER 1 WINS!";
+                  } else if (pointsTracker[1] === Math.min(...pointsTracker)) {
+                    notification.textContent = "COMPUTER 2 WINS!";
+                  } else if (pointsTracker[2] === Math.min(...pointsTracker)) {
+                    notification.textContent = "COMPUTER 3 WINS!";
+                  } else {
+                    notification.textContent = "YOU WIN!";
+                  }
+              }
+              notification.appendChild(resultsContainer);
+              notification.appendChild(optionsContainer);
+              optionsContainer.appendChild(playAgain);
+              optionsContainer.appendChild(mainMenu);
+              resultsContainer.appendChild(comOneResults);
+              resultsContainer.appendChild(comTwoResults);
+              resultsContainer.appendChild(comThreeResults);
+              resultsContainer.appendChild(playerResults);
+
+              playAgain.addEventListener("click", function () {
+                deck.shuffle();
+                roundTracker = 1;
+                crazyEights(deck, cardBack, numPlayers);
+                resolve;
+              });
+              mainMenu.addEventListener("click", function () {
+                gameArea.style.backgroundImage = null;
+                gameArea.style.backgroundColor = null;
+                startUp();
+              });
+            }, 2000);
+          }
         }, 2000);
       });
     }
 
+    switch (numPlayers) {
+      case 2:
+        if (hand.id.endsWith("two")) {
+          notification.textContent = `COMPUTER WINS ROUND ${roundTracker}!`;
+        } else {
+          notification.textContent = `YOU WIN ROUND ${roundTracker}!`;
+        }
+        gameArea.appendChild(notification);
+
+        for (let card of comHandTwo.querySelectorAll(".card-container")) {
+          if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+            pointsTracker[0] += 10;
+          } else if (cardName(card)[0] === "A") {
+            pointsTracker[0] += 1;
+          } else {
+            pointsTracker[0] += parseInt(cardName(card)[0]);
+          }
+        }
+        for (let card of playerHand.querySelectorAll(".card-container")) {
+          if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+            pointsTracker[1] += 10;
+          } else if (cardName(card)[0] === "A") {
+            pointsTracker[1] += 1;
+          } else {
+            pointsTracker[1] += parseInt(cardName(card)[0]);
+          }
+        }
+
+        comTwoResults.textContent = `COMPUTER: ${pointsTracker[0]}`;
+        playerResults.textContent = `YOU: ${pointsTracker[1]}`;
+        break;
+      case 3:
+        if (hand.id.endsWith("one")) {
+          notification.textContent = `COMPUTER 1 WINS ROUND ${roundTracker}!`;
+        } else if (hand.id.endsWith("three")) {
+          notification.textContent = `COMPUTER 2 WINS ROUND ${roundTracker}!`;
+        } else {
+          notification.textContent = `YOU WIN ROUND ${roundTracker}!`;
+        }
+        gameArea.appendChild(notification);
+
+        for (let card of comHandOne.querySelectorAll(".card-container")) {
+          if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+            pointsTracker[0] += 10;
+          } else if (cardName(card)[0] === "A") {
+            pointsTracker[0] += 1;
+          } else {
+            pointsTracker[0] += parseInt(cardName(card)[0]);
+          }
+        }
+        for (let card of comHandThree.querySelectorAll(".card-container")) {
+          if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+            pointsTracker[1] += 10;
+          } else if (cardName(card)[0] === "A") {
+            pointsTracker[1] += 1;
+          } else {
+            pointsTracker[1] += parseInt(cardName(card)[0]);
+          }
+        }
+        for (let card of playerHand.querySelectorAll(".card-container")) {
+          if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+            pointsTracker[2] += 10;
+          } else if (cardName(card)[0] === "A") {
+            pointsTracker[2] += 1;
+          } else {
+            pointsTracker[2] += parseInt(cardName(card)[0]);
+          }
+        }
+
+        comOneResults.textContent = `COMPUTER 1: ${pointsTracker[0]}`;
+        comThreeResults.textContent = `COMPUTER 2: ${pointsTracker[1]}`;
+        playerResults.textContent = `YOU: ${pointsTracker[2]}`;
+        break;
+      case 4:
+        if (hand.id.endsWith("one")) {
+          notification.textContent = `COMPUTER 1 WINS ROUND ${roundTracker}!`;
+        } else if (hand.id.endsWith("two")) {
+          notification.textContent = `COMPUTER 2 WINS ROUND ${roundTracker}!`;
+        } else if (hand.id.endsWith("three")) {
+          notification.textContent = `COMPUTER 3 WINS ROUND ${roundTracker}!`;
+        } else {
+          notification.textContent = `YOU WIN ROUND ${roundTracker}!`;
+        }
+        gameArea.appendChild(notification);
+
+        for (let card of comHandOne.querySelectorAll(".card-container")) {
+          if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+            pointsTracker[0] += 10;
+          } else if (cardName(card)[0] === "A") {
+            pointsTracker[0] += 1;
+          } else {
+            pointsTracker[0] += parseInt(cardName(card)[0]);
+          }
+        }
+        for (let card of comHandTwo.querySelectorAll(".card-container")) {
+          if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+            pointsTracker[1] += 10;
+          } else if (cardName(card)[0] === "A") {
+            pointsTracker[1] += 1;
+          } else {
+            pointsTracker[1] += parseInt(cardName(card)[0]);
+          }
+        }
+        for (let card of comHandThree.querySelectorAll(".card-container")) {
+          if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+            pointsTracker[2] += 10;
+          } else if (cardName(card)[0] === "A") {
+            pointsTracker[2] += 1;
+          } else {
+            pointsTracker[2] += parseInt(cardName(card)[0]);
+          }
+        }
+        for (let card of playerHand.querySelectorAll(".card-container")) {
+          if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+            pointsTracker[3] += 10;
+          } else if (cardName(card)[0] === "A") {
+            pointsTracker[3] += 1;
+          } else {
+            pointsTracker[3] += parseInt(cardName(card)[0]);
+          }
+        }
+
+        comOneResults.textContent = `COMPUTER 1: ${pointsTracker[0]}`;
+        comTwoResults.textContent = `COMPUTER 2: ${pointsTracker[1]}`;
+        comThreeResults.textContent = `COMPUTER 3: ${pointsTracker[2]}`;
+        playerResults.textContent = `YOU: ${pointsTracker[3]}`;
+    }
+
     await new Promise(async function (resolve) {
-      await cardClick();
+      await roundFinish();
       resolve();
     });
   }
@@ -1012,10 +1233,22 @@ const gamePlay = async function (
 
   backToMain.addEventListener("click", function () {
     gameArea.style.backgroundImage = null;
+    gameArea.style.backgroundColor = null;
     startUp();
   });
 
   gameArea.appendChild(backToMain);
+
+  switch (numPlayers) {
+    case 2:
+      pointsTracker.push(0, 0);
+      break;
+    case 3:
+      pointsTracker.push(0, 0, 0);
+      break;
+    case 4:
+      pointsTracker.push(0, 0, 0, 0);
+  }
 
   let playing = true;
 
@@ -1025,126 +1258,144 @@ const gamePlay = async function (
         switch (turnOrder) {
           case 1:
             await playerTurn(playerHand, deckDiv, discard, gameArea);
-            [turnOrder, playing] = await winner(
+            turnOrder = await winner(
               playerHand,
+              playerHand,
+              comHandOne,
+              comHandTwo,
+              comHandThree,
               numPlayers,
               turnOrder,
-              playing,
               deck,
               cardBack,
               gameArea
             );
-            deckCheck(deckDiv, discard);
             break;
           case 2:
             await comTurn(comHandTwo, deckDiv, discard, gameArea);
-            [turnOrder, playing] = await winner(
+            turnOrder = await winner(
               comHandTwo,
+              playerHand,
+              comHandOne,
+              comHandTwo,
+              comHandThree,
               numPlayers,
               turnOrder,
-              playing,
               deck,
               cardBack,
               gameArea
             );
-            deckCheck(deckDiv, discard);
         }
         break;
       case 3:
         switch (turnOrder) {
           case 1:
             await playerTurn(playerHand, deckDiv, discard, gameArea);
-            [turnOrder, playing] = await winner(
+            turnOrder = await winner(
               playerHand,
-              numPlayers,
-              turnOrder,
-              playing,
-              deck,
-              cardBack,
-              gameArea
-            );
-            deckCheck(deckDiv, discard);
-            break;
-          case 2:
-            await comTurn(comHandOne, deckDiv, discard, gameArea);
-            [turnOrder, playing] = await winner(
+              playerHand,
               comHandOne,
-              numPlayers,
-              turnOrder,
-              playing,
-              deck,
-              cardBack,
-              gameArea
-            );
-            deckCheck(deckDiv, discard);
-            break;
-          case 3:
-            await comTurn(comHandThree, deckDiv, discard, gameArea);
-            [turnOrder, playing] = await winner(
+              comHandTwo,
               comHandThree,
               numPlayers,
               turnOrder,
-              playing,
               deck,
               cardBack,
               gameArea
             );
-            deckCheck(deckDiv, discard);
+            break;
+          case 2:
+            await comTurn(comHandOne, deckDiv, discard, gameArea);
+            turnOrder = await winner(
+              comHandOne,
+              playerHand,
+              comHandOne,
+              comHandTwo,
+              comHandThree,
+              numPlayers,
+              turnOrder,
+              deck,
+              cardBack,
+              gameArea
+            );
+            break;
+          case 3:
+            await comTurn(comHandThree, deckDiv, discard, gameArea);
+            turnOrder = await winner(
+              comHandThree,
+              playerHand,
+              comHandOne,
+              comHandTwo,
+              comHandThree,
+              numPlayers,
+              turnOrder,
+              deck,
+              cardBack,
+              gameArea
+            );
         }
         break;
       case 4:
         switch (turnOrder) {
           case 1:
             await playerTurn(playerHand, deckDiv, discard, gameArea);
-            [turnOrder, playing] = await winner(
+            turnOrder = await winner(
               playerHand,
-              numPlayers,
-              turnOrder,
-              playing,
-              deck,
-              cardBack,
-              gameArea
-            );
-            deckCheck(deckDiv, discard);
-            break;
-          case 2:
-            await comTurn(comHandOne, deckDiv, discard, gameArea);
-            [turnOrder, playing] = await winner(
+              playerHand,
               comHandOne,
-              numPlayers,
-              turnOrder,
-              playing,
-              deck,
-              cardBack,
-              gameArea
-            );
-            deckCheck(deckDiv, discard);
-            break;
-          case 3:
-            await comTurn(comHandTwo, deckDiv, discard, gameArea);
-            [turnOrder, playing] = await winner(
               comHandTwo,
-              numPlayers,
-              turnOrder,
-              playing,
-              deck,
-              cardBack,
-              gameArea
-            );
-            deckCheck(deckDiv, discard);
-            break;
-          case 4:
-            await comTurn(comHandThree, deckDiv, discard, gameArea);
-            [turnOrder, playing] = await winner(
               comHandThree,
               numPlayers,
               turnOrder,
-              playing,
               deck,
               cardBack,
               gameArea
             );
-            deckCheck(deckDiv, discard);
+            break;
+          case 2:
+            await comTurn(comHandOne, deckDiv, discard, gameArea);
+            turnOrder = await winner(
+              comHandOne,
+              playerHand,
+              comHandOne,
+              comHandTwo,
+              comHandThree,
+              numPlayers,
+              turnOrder,
+              deck,
+              cardBack,
+              gameArea
+            );
+            break;
+          case 3:
+            await comTurn(comHandTwo, deckDiv, discard, gameArea);
+            turnOrder = await winner(
+              comHandTwo,
+              playerHand,
+              comHandOne,
+              comHandTwo,
+              comHandThree,
+              numPlayers,
+              turnOrder,
+              deck,
+              cardBack,
+              gameArea
+            );
+            break;
+          case 4:
+            await comTurn(comHandThree, deckDiv, discard, gameArea);
+            turnOrder = await winner(
+              comHandThree,
+              playerHand,
+              comHandOne,
+              comHandTwo,
+              comHandThree,
+              numPlayers,
+              turnOrder,
+              deck,
+              cardBack,
+              gameArea
+            );
         }
     }
   }
