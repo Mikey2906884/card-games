@@ -1,411 +1,18 @@
-import { randomChoice, randBetween, correctHandVis, startUp } from "./index.js";
 var eightsCount = 0;
 var roundTracker = 1;
 var pointsTracker = [];
 
-Array.prototype.shuffle = function () {
-  for (let i = this.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [this[i], this[j]] = [this[j], this[i]];
-  }
-  return this;
-};
+import { startUp } from "../index.js";
 
-const cardName = (card) => card.id.slice(0, card.id.length - 10);
+import {
+  randomChoice,
+  randBetween,
+  cardName,
+  shuffle,
+  moveCard,
+} from "../shared.js";
 
-export function correctCardOrder(container) {
-  const cards = container.querySelectorAll(".card-container");
-  let indexTrack = cards.length - 1;
-  for (let i = cards.length; i > 0; i--) {
-    cards[indexTrack].style.zIndex = `${i}`;
-
-    if (
-      cardName(cards[indexTrack])[0] === "8" &&
-      container.id === "player-hand"
-    ) {
-      cards[indexTrack].style.zIndex = "0";
-    } else if (
-      cardName(cards[indexTrack]).at(-1) === "♠" &&
-      container.id === "player-hand"
-    ) {
-      cards[indexTrack].style.zIndex = "1";
-    } else if (
-      cardName(cards[indexTrack]).at(-1) === "♥" &&
-      container.id === "player-hand"
-    ) {
-      cards[indexTrack].style.zIndex = "2";
-    } else if (
-      cardName(cards[indexTrack]).at(-1) === "♣" &&
-      container.id === "player-hand"
-    ) {
-      cards[indexTrack].style.zIndex = "3";
-    } else if (
-      cardName(cards[indexTrack]).at(-1) === "♦" &&
-      container.id === "player-hand"
-    ) {
-      cards[indexTrack].style.zIndex = "4";
-    }
-    indexTrack--;
-  }
-}
-
-const moveCard = async function (from, to, card) {
-  const fromClassList = Array.from(from.classList);
-  const toClassList = Array.from(to.classList);
-
-  card.style.display = "none";
-
-  from.removeChild(card);
-  to.appendChild(card);
-  correctCardOrder(to);
-
-  await new Promise((resolve) => {
-    card.style.display = null;
-    card.style.position = "fixed";
-
-    if (from.id === "com-hand-three") {
-      card.style.top = `${from.offsetTop}px`;
-      card.style.left = `${
-        from.offsetLeft + from.offsetWidth - card.offsetWidth
-      }px`;
-    } else {
-      card.style.top = `${from.offsetTop}px`;
-      card.style.left = `${from.offsetLeft}px`;
-    }
-
-    setTimeout(function () {
-      if (to.id === "com-hand-three") {
-        card.style.top = `${to.offsetTop}px`;
-        card.style.right = `0`;
-      } else {
-        card.style.top = `${to.offsetTop}px`;
-        card.style.left = `${to.offsetLeft}px`;
-      }
-      if (from.id != "player-hand") {
-        card.querySelector(".card").style.transform = `rotateX(${
-          card.querySelector(".card").style.transform === "rotateX(180deg)"
-            ? "0"
-            : "180"
-        }deg)`;
-        if (toClassList.includes("discard")) {
-          card.querySelector(".card").style.transform =
-            "rotateY(0deg) rotateZ(180deg)";
-        }
-      }
-      if (toClassList.includes("player")) {
-        card.querySelector(".card").style.transform =
-          "rotateY(0deg) rotateZ(-180deg)";
-      }
-    }, 100);
-
-    setTimeout(function () {
-      card.style.top = null;
-      card.style.left = null;
-      card.style.right = null;
-      resolve();
-    }, 750);
-  });
-
-  if (fromClassList.includes("hand")) {
-    correctHandVis(from);
-  }
-
-  if (toClassList.includes("hand")) {
-    if (toClassList.includes("player")) {
-      if (cardName(card)[0] === "8") {
-        card.style.order = "-1";
-      } else if (cardName(card).at(-1) === "♦") {
-        if (cardName(card)[0] === "A") {
-          card.style.order = "40";
-        } else if (cardName(card)[0] === "1") {
-          card.style.order = "49";
-        } else if (cardName(card)[0] === "J") {
-          card.style.order = "50";
-        } else if (cardName(card)[0] === "Q") {
-          card.style.order = "51";
-        } else if (cardName(card)[0] === "K") {
-          card.style.order = "52";
-        } else {
-          card.style.order = `${39 + parseInt(cardName(card)[0])}`;
-        }
-      } else if (cardName(card).at(-1) === "♣") {
-        if (cardName(card)[0] === "A") {
-          card.style.order = "27";
-        } else if (cardName(card)[0] === "1") {
-          card.style.order = "36";
-        } else if (cardName(card)[0] === "J") {
-          card.style.order = "37";
-        } else if (cardName(card)[0] === "Q") {
-          card.style.order = "38";
-        } else if (cardName(card)[0] === "K") {
-          card.style.order = "39";
-        } else {
-          card.style.order = `${26 + parseInt(cardName(card)[0])}`;
-        }
-      } else if (cardName(card).at(-1) === "♥") {
-        if (cardName(card)[0] === "A") {
-          card.style.order = "14";
-        } else if (cardName(card)[0] === "1") {
-          card.style.order = "23";
-        } else if (cardName(card)[0] === "J") {
-          card.style.order = "24";
-        } else if (cardName(card)[0] === "Q") {
-          card.style.order = "25";
-        } else if (cardName(card)[0] === "K") {
-          card.style.order = "26";
-        } else {
-          card.style.order = `${13 + parseInt(cardName(card)[0])}`;
-        }
-      } else if (cardName(card).at(-1) === "♠") {
-        if (cardName(card)[0] === "A") {
-          card.style.order = "1";
-        } else if (cardName(card)[0] === "1") {
-          card.style.order = "10";
-        } else if (cardName(card)[0] === "J") {
-          card.style.order = "11";
-        } else if (cardName(card)[0] === "Q") {
-          card.style.order = "12";
-        } else if (cardName(card)[0] === "K") {
-          card.style.order = "13";
-        } else {
-          card.style.order = `${parseInt(cardName(card)[0])}`;
-        }
-      }
-    }
-
-    card.style.position = "relative";
-    correctHandVis(to);
-  } else if (toClassList.includes("deck")) {
-    card.style.position = "absolute";
-  }
-};
-
-const populateDeck = function (deck, cardBack) {
-  const deckDiv = document.getElementById("deck");
-
-  for (let card of deck) {
-    const container = document.createElement("div");
-    const cardPiece = document.createElement("div");
-    const front = document.createElement("div");
-    const back = document.createElement("div");
-
-    container.id = `${card}-container`;
-    container.className = "card-container";
-    container.style.flexShrink = 0;
-    cardPiece.id = card;
-    cardPiece.className = "card";
-    front.id = "front";
-    front.className = "front";
-    front.style.backgroundImage = `url("../Images/Cards/${card}.png")`;
-    back.id = "back";
-    back.className = "back";
-    back.style.backgroundImage = `url("../Images/Cards/Backs/${cardBack}.png")`;
-
-    deckDiv.appendChild(container);
-    container.appendChild(cardPiece);
-    cardPiece.appendChild(front);
-    cardPiece.appendChild(back);
-  }
-
-  return deckDiv;
-};
-
-const createDiscard = function (deckDiv, gameArea) {
-  const discard = document.createElement("div");
-
-  [discard.id, discard.classList, discard.style.left] = [
-    "discard",
-    "discard deck",
-    "1.5vw",
-  ];
-  deckDiv.style.left = "-1.5vw";
-
-  gameArea.appendChild(discard);
-  return discard;
-};
-
-const createHands = function (gameArea, numPlayers) {
-  const comHands = [];
-  const playerHand = document.createElement("div");
-
-  for (let i = 0; i < numPlayers - 1; i++) {
-    comHands.push(document.createElement("div"));
-  }
-
-  switch (numPlayers) {
-    case 2:
-      [
-        comHands[0].id,
-        comHands[0].classList,
-        comHands[0].style.maxWidth,
-        comHands[0].style.top,
-      ] = ["com-hand-two", "hand h-hand", "50vw", "0"];
-
-      window.addEventListener("resize", () => {
-        setTimeout(function () {
-          const [playerHand, comHandTwo] = [
-            document.getElementById("player-hand"),
-            document.getElementById("com-hand-two"),
-          ];
-          correctHandVis(playerHand);
-          correctHandVis(comHandTwo);
-        }, 500);
-      });
-
-      gameArea.appendChild(comHands[0]);
-      break;
-    case 3:
-      [
-        comHands[0].id,
-        comHands[0].classList,
-        comHands[0].style.maxWidth,
-        comHands[0].style.left,
-      ] = ["com-hand-one", "hand v-hand", "50vh", "0"];
-
-      [
-        comHands[1].id,
-        comHands[1].classList,
-        comHands[1].style.maxWidth,
-        comHands[1].style.right,
-      ] = ["com-hand-three", "hand v-hand", "50vh", "0"];
-
-      window.addEventListener("resize", () => {
-        setTimeout(function () {
-          const [playerHand, comHandOne, comHandThree] = [
-            document.getElementById("player-hand"),
-            document.getElementById("com-hand-one"),
-            document.getElementById("com-hand-three"),
-          ];
-          correctHandVis(playerHand);
-          correctHandVis(comHandOne);
-          correctHandVis(comHandThree);
-        }, 500);
-      });
-
-      gameArea.appendChild(comHands[0]);
-      gameArea.appendChild(comHands[1]);
-      break;
-    case 4:
-      [
-        comHands[0].id,
-        comHands[0].classList,
-        comHands[0].style.maxWidth,
-        comHands[0].style.left,
-      ] = ["com-hand-one", "hand v-hand", "50vh", "0"];
-
-      [
-        comHands[1].id,
-        comHands[1].classList,
-        comHands[1].style.maxWidth,
-        comHands[1].style.top,
-      ] = ["com-hand-two", "hand h-hand", "50vw", "0"];
-
-      [
-        comHands[2].id,
-        comHands[2].classList,
-        comHands[2].style.maxWidth,
-        comHands[2].style.right,
-      ] = ["com-hand-three", "hand v-hand", "50vh", "0"];
-
-      window.addEventListener("resize", () => {
-        setTimeout(function () {
-          const [playerHand, comHandOne, comHandTwo, comHandThree] = [
-            document.getElementById("player-hand"),
-            document.getElementById("com-hand-one"),
-            document.getElementById("com-hand-two"),
-            document.getElementById("com-hand-three"),
-          ];
-          correctHandVis(playerHand);
-          correctHandVis(comHandOne);
-          correctHandVis(comHandTwo);
-          correctHandVis(comHandThree);
-        }, 500);
-      });
-
-      gameArea.appendChild(comHands[0]);
-      gameArea.appendChild(comHands[1]);
-      gameArea.appendChild(comHands[2]);
-  }
-
-  [
-    playerHand.id,
-    playerHand.classList,
-    playerHand.style.maxWidth,
-    playerHand.style.bottom,
-  ] = ["player-hand", "hand h-hand player", "50vw", "0"];
-
-  playerHand.addEventListener("mouseover", () => {
-    const cardsInHand = playerHand.querySelectorAll(".card-container");
-    const maxWidth =
-      (parseFloat(playerHand.style.maxWidth) / 100) * window.innerWidth;
-
-    for (let card of cardsInHand) {
-      card.addEventListener("mouseenter", function () {
-        card.style.marginRight = null;
-        card.style.marginLeft = null;
-
-        if (
-          cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth >=
-            maxWidth &&
-          card.parentElement.id === "player-hand"
-        ) {
-          card.style.marginRight = `-${
-            (card.offsetWidth -
-              (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
-              2 -
-            (0.9 *
-              (card.offsetWidth -
-                (maxWidth - card.offsetWidth) / (cardsInHand.length - 1))) /
-              2
-          }px`;
-          card.style.marginLeft = `-${
-            (card.offsetWidth -
-              (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
-              2 -
-            (0.25 *
-              (card.offsetWidth -
-                (maxWidth - card.offsetWidth) / (cardsInHand.length - 1))) /
-              2
-          }px`;
-        }
-      });
-      card.addEventListener("mouseleave", function () {
-        card.style.marginRight = null;
-        card.style.marginLeft = null;
-
-        if (
-          cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth >=
-            maxWidth &&
-          card.parentElement.id === "player-hand"
-        ) {
-          card.style.marginRight = `-${
-            (card.offsetWidth -
-              (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
-            2
-          }px`;
-          card.style.marginLeft = `-${
-            (card.offsetWidth -
-              (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
-            2
-          }px`;
-        }
-      });
-    }
-  });
-
-  gameArea.appendChild(playerHand);
-
-  switch (numPlayers) {
-    case 2:
-      return [comHands[0], playerHand];
-      break;
-    case 3:
-      return [comHands[0], comHands[1], playerHand];
-      break;
-    case 4:
-      return [comHands[0], comHands[1], comHands[2], playerHand];
-  }
-};
+import { populateDeck, createDiscard, createHands } from "./support.js";
 
 const initialDeal = function (
   deck,
@@ -418,70 +25,71 @@ const initialDeal = function (
   turnOrder
 ) {
   let cardsInDeck = deck.querySelectorAll(".card-container");
+  console.log(cardsInDeck[0]);
 
   for (let i = 0; i < 5; i++) {
     switch (numPlayers) {
       case 2:
         switch (turnOrder) {
           case 1:
-            moveCard(deck, playerHand, cardsInDeck[0]);
-            moveCard(deck, comHandTwo, cardsInDeck[1]);
+            moveCard(deck, playerHand, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandTwo, cardsInDeck[1], "CRAZY EIGHTS");
             break;
           case 2:
-            moveCard(deck, comHandTwo, cardsInDeck[0]);
-            moveCard(deck, playerHand, cardsInDeck[1]);
+            moveCard(deck, comHandTwo, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[1], "CRAZY EIGHTS");
         }
         break;
       case 3:
         switch (turnOrder) {
           case 1:
-            moveCard(deck, playerHand, cardsInDeck[0]);
-            moveCard(deck, comHandOne, cardsInDeck[1]);
-            moveCard(deck, comHandThree, cardsInDeck[2]);
+            moveCard(deck, playerHand, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandOne, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, comHandThree, cardsInDeck[2], "CRAZY EIGHTS");
             break;
           case 2:
-            moveCard(deck, comHandOne, cardsInDeck[0]);
-            moveCard(deck, comHandThree, cardsInDeck[1]);
-            moveCard(deck, playerHand, cardsInDeck[2]);
+            moveCard(deck, comHandOne, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandThree, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[2], "CRAZY EIGHTS");
             break;
           case 3:
-            moveCard(deck, comHandThree, cardsInDeck[0]);
-            moveCard(deck, playerHand, cardsInDeck[1]);
-            moveCard(deck, comHandOne, cardsInDeck[2]);
+            moveCard(deck, comHandThree, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, comHandOne, cardsInDeck[2], "CRAZY EIGHTS");
         }
         break;
       case 4:
         switch (turnOrder) {
           case 1:
-            moveCard(deck, playerHand, cardsInDeck[0]);
-            moveCard(deck, comHandOne, cardsInDeck[1]);
-            moveCard(deck, comHandTwo, cardsInDeck[2]);
-            moveCard(deck, comHandThree, cardsInDeck[3]);
+            moveCard(deck, playerHand, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandOne, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, comHandTwo, cardsInDeck[2], "CRAZY EIGHTS");
+            moveCard(deck, comHandThree, cardsInDeck[3], "CRAZY EIGHTS");
             break;
           case 2:
-            moveCard(deck, comHandOne, cardsInDeck[0]);
-            moveCard(deck, comHandTwo, cardsInDeck[1]);
-            moveCard(deck, comHandThree, cardsInDeck[2]);
-            moveCard(deck, playerHand, cardsInDeck[3]);
+            moveCard(deck, comHandOne, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandTwo, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, comHandThree, cardsInDeck[2], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[3], "CRAZY EIGHTS");
             break;
           case 3:
-            moveCard(deck, comHandTwo, cardsInDeck[0]);
-            moveCard(deck, comHandThree, cardsInDeck[1]);
-            moveCard(deck, playerHand, cardsInDeck[2]);
-            moveCard(deck, comHandOne, cardsInDeck[3]);
+            moveCard(deck, comHandTwo, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandThree, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[2], "CRAZY EIGHTS");
+            moveCard(deck, comHandOne, cardsInDeck[3], "CRAZY EIGHTS");
             break;
           case 4:
-            moveCard(deck, comHandThree, cardsInDeck[0]);
-            moveCard(deck, playerHand, cardsInDeck[1]);
-            moveCard(deck, comHandOne, cardsInDeck[2]);
-            moveCard(deck, comHandTwo, cardsInDeck[3]);
+            moveCard(deck, comHandThree, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, comHandOne, cardsInDeck[2], "CRAZY EIGHTS");
+            moveCard(deck, comHandTwo, cardsInDeck[3], "CRAZY EIGHTS");
         }
     }
 
     cardsInDeck = deck.querySelectorAll(".card-container");
   }
 
-  moveCard(deck, discard, cardsInDeck[0]);
+  moveCard(deck, discard, cardsInDeck[0], "CRAZY EIGHTS");
 };
 
 const playerPlayedEight = async function (cardPlayed, gameArea) {
@@ -615,7 +223,6 @@ const playerTurn = async function (playerHand, deck, discard, gameArea) {
           ) {
             Counter++;
             card.style.bottom = "3vh";
-            card.style.boxShadow = "0 0 25px white";
           }
 
           card.clickMe = async function () {
@@ -636,7 +243,7 @@ const playerTurn = async function (playerHand, deck, discard, gameArea) {
             } else {
               card.style.bottom = null;
               card.style.boxShadow = null;
-              moveCard(playerHand, discard, card);
+              moveCard(playerHand, discard, card, "CRAZY EIGHTS");
 
               if (cardName(card)[0] === "8") {
                 await playerPlayedEight(card, gameArea);
@@ -685,29 +292,34 @@ const playerTurn = async function (playerHand, deck, discard, gameArea) {
             ) &&
             !(cardName(topOfDeck)[0] === "8")
           ) {
-            moveCard(deck, playerHand, topOfDeck);
+            moveCard(deck, playerHand, topOfDeck, "CRAZY EIGHTS");
+
             await deckCheck(deck, discard);
+
             topOfDeck.style.boxShadow = null;
 
-            let double = topOfDeck.clickMe;
+            let doubleClick = topOfDeck.clickMe;
 
             topOfDeck = Array.from(deck.querySelectorAll(".card-container")).at(
               -1
             );
             topOfDeck.style.boxShadow = "0 0 50px red";
-            topOfDeck.clickMe = double;
+            topOfDeck.clickMe = doubleClick;
 
-            topOfDeck.addEventListener("click", topOfDeck.clickMe);
+            setTimeout(function () {
+              topOfDeck.addEventListener("click", topOfDeck.clickMe);
+            }, 250);
           } else {
-            moveCard(deck, playerHand, topOfDeck);
+            moveCard(deck, playerHand, topOfDeck, "CRAZY EIGHTS");
+
+            await deckCheck(deck, discard);
 
             topOfDeck.style.bottom = "3vh";
-            topOfDeck.style.boxShadow = "0 0 25px white";
 
             setTimeout(async function () {
               topOfDeck.style.bottom = null;
               topOfDeck.style.boxShadow = null;
-              moveCard(playerHand, discard, topOfDeck);
+              moveCard(playerHand, discard, topOfDeck, "CRAZY EIGHTS");
 
               if (cardName(topOfDeck)[0] === "8") {
                 await playerPlayedEight(topOfDeck, gameArea);
@@ -723,21 +335,20 @@ const playerTurn = async function (playerHand, deck, discard, gameArea) {
           }
         };
 
-        topOfDeck.addEventListener("click", topOfDeck.clickMe);
+        setTimeout(function () {
+          topOfDeck.addEventListener("click", topOfDeck.clickMe);
+        }, 250);
       }, 1000);
     });
   }
 
-  await new Promise(async function (resolve) {
-    await cardClick();
-    for (let card of playerHand.querySelectorAll(".card-container")) {
-      card.removeEventListener("click", card.clickMe);
-      topOfDeck.removeEventListener("click", topOfDeck.clickMe);
-      card.style.bottom = null;
-      card.style.boxShadow = null;
-    }
-    resolve();
-  });
+  await cardClick();
+  for (let card of playerHand.querySelectorAll(".card-container")) {
+    card.removeEventListener("click", card.clickMe);
+    topOfDeck.removeEventListener("click", topOfDeck.clickMe);
+    card.style.bottom = null;
+    card.style.boxShadow = null;
+  }
 };
 
 const comTurn = async function (comHand, deck, discard, gameArea) {
@@ -845,7 +456,7 @@ const comTurn = async function (comHand, deck, discard, gameArea) {
       }
 
       if (play != null) {
-        moveCard(comHand, discard, play);
+        moveCard(comHand, discard, play, "CRAZY EIGHTS");
 
         if (cardName(play)[0] === "8") {
           let suiteChoice;
@@ -873,7 +484,7 @@ const comTurn = async function (comHand, deck, discard, gameArea) {
         let drawing = 0;
 
         while (drawing === 0) {
-          moveCard(deck, comHand, topOfDeck);
+          moveCard(deck, comHand, topOfDeck, "CRAZY EIGHTS");
           setTimeout(function () {
             deckCheck(deck, discard);
           }, 500);
@@ -897,7 +508,7 @@ const comTurn = async function (comHand, deck, discard, gameArea) {
                 ).at(-1);
                 resolve();
               } else {
-                moveCard(comHand, discard, topOfDeck);
+                moveCard(comHand, discard, topOfDeck, "CRAZY EIGHTS");
 
                 if (cardName(topOfDeck)[0] === "8") {
                   let suiteChoice;
@@ -950,14 +561,14 @@ const deckCheck = async function (deck, discard) {
         if (
           card != Array.from(discard.querySelectorAll(".card-container")).at(-1)
         ) {
-          moveCard(discard, deck, card);
+          moveCard(discard, deck, card, "CRAZY EIGHTS");
         } else {
           resolve();
         }
       }
     });
     const deckArray = Array.from(deck.querySelectorAll(".card-container"));
-    deckArray.shuffle();
+    shuffle(deckArray);
 
     for (let card of deckArray) {
       deck.removeChild(card);
@@ -1016,10 +627,10 @@ const winner = async function (
           resultsContainer.appendChild(comThreeResults);
           resultsContainer.appendChild(playerResults);
 
-          if (roundTracker != 1) {
+          if (roundTracker != 3) {
             notification.appendChild(continuer);
             continuer.addEventListener("click", function () {
-              deck.shuffle();
+              shuffle(deck);
               roundTracker++;
               crazyEights(deck, cardBack, numPlayers);
             });
@@ -1063,7 +674,7 @@ const winner = async function (
               resultsContainer.appendChild(playerResults);
 
               playAgain.addEventListener("click", function () {
-                deck.shuffle();
+                shuffle(deck);
                 roundTracker = 1;
                 crazyEights(deck, cardBack, numPlayers);
                 resolve;

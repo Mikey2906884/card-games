@@ -60,13 +60,10 @@ body {
 .card-container {
   position: absolute;
   aspect-ratio: 3 / 4;
-  perspective: 20vw;
   border-radius: 10px;
-  transition: ease-in-out 0.75s;
-}
-
-.card {
-  transition: ease-in-out 0.75s;
+  perspective: 1000px;
+  flex-shrink: 0;
+  transition: all 0.75s;
 }
 
 @media (orientation: landscape) {
@@ -101,6 +98,7 @@ div.player > .card-container:hover {
   height: 100%;
   width: 100%;
   transform: rotateY(180deg);
+  transition: all 0.75s;
   transform-style: preserve-3d;
 }
 
@@ -120,7 +118,6 @@ div.player > .card-container:hover {
 }
 
 #back {
-  background-image: url("../Images/Cards/BBACK.png");
   background-size: cover;
   transform: rotateY(180deg);
 }

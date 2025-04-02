@@ -1,98 +1,12 @@
-import { crazyEights, correctCardOrder } from "./crazy-eights.js";
-var roundTracker = 1;
+import { crazyEights } from "./Crazy Eights/game.js";
 
-Array.prototype.shuffle = function () {
-  for (let i = this.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [this[i], this[j]] = [this[j], this[i]];
-  }
-  return this;
-};
-
-export function randomChoice(array) {
-  const randomIndex = Math.floor(Math.random() * array.length);
-  return array[randomIndex];
-}
-
-export function randBetween(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-export function cardName(card) {
-  card.id.slice(0, card.id.length - 10);
-}
-
-export function correctHandVis(hand) {
-  let maxWidth;
-  const cardsInHand = hand.querySelectorAll(".card-container");
-  correctCardOrder(hand);
-
-  if (Array.from(hand.classList).includes("h-hand")) {
-    maxWidth = (parseFloat(hand.style.maxWidth) / 100) * window.innerWidth;
-  } else if (Array.from(hand.classList).includes("v-hand")) {
-    if (hand.style.left) {
-      hand.style.transform = `rotate(90deg) translate(0, ${
-        (hand.offsetWidth - hand.offsetHeight) / 2
-      }px)`;
-    } else {
-      hand.style.transform = `rotate(90deg) translate(0, -${
-        (hand.offsetWidth - hand.offsetHeight) / 2
-      }px)`;
-    }
-
-    maxWidth = (parseFloat(hand.style.maxWidth) / 100) * window.innerHeight;
-  }
-
-  for (let card of cardsInHand) {
-    card.style.marginRight = null;
-    card.style.marginLeft = null;
-
-    if (hand.style.left) {
-      hand.style.transform = `rotate(90deg) translate(0, ${
-        (cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth -
-          hand.offsetHeight) /
-        2
-      }px)`;
-    } else if (hand.style.right) {
-      hand.style.transform = `rotate(90deg) translate(0, -${
-        (cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth -
-          hand.offsetHeight) /
-        2
-      }px)`;
-    }
-  }
-
-  if (cardsInHand.length != 0) {
-    if (
-      cardsInHand.length * Array.from(cardsInHand)[0].offsetWidth >=
-      maxWidth
-    ) {
-      for (let card of cardsInHand) {
-        card.style.marginRight = `-${
-          (card.offsetWidth -
-            (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
-          2
-        }px`;
-        card.style.marginLeft = `-${
-          (card.offsetWidth -
-            (maxWidth - card.offsetWidth) / (cardsInHand.length - 1)) /
-          2
-        }px`;
-      }
-      if (hand.style.left) {
-        hand.style.transform = `rotate(90deg) translate(0, ${
-          (maxWidth - hand.offsetHeight) / 2 +
-          parseFloat(hand.querySelector(".card-container").style.marginRight)
-        }px)`;
-      } else if (hand.style.right) {
-        hand.style.transform = `rotate(90deg) translate(0, -${
-          (maxWidth - hand.offsetHeight) / 2 +
-          parseFloat(hand.querySelector(".card-container").style.marginRight)
-        }px)`;
-      }
-    }
-  }
-}
+import {
+  shuffle,
+  randomChoice,
+  randBetween,
+  cardName,
+  correctCardOrder,
+} from "./shared.js";
 
 const createDeck = function () {
   const values = [
@@ -123,40 +37,55 @@ const createDeck = function () {
   }
   deckWithJokers.push("BJOKER", "RJOKER");
 
-  deck.shuffle();
-  deckWithJokers.shuffle();
+  shuffle(deck);
+  shuffle(deckWithJokers);
 
   return [deck, deckWithJokers, cardBack];
 };
 
 const mainMenu = async function (gameArea) {
   const notification = document.createElement("div");
-  const optionsBox = document.createElement("div");
-  const gameSelector = document.createElement("div");
-  const gameSelectorHover = document.createElement("div");
-  const selectContent = document.createElement("div");
-  const numPlayersSelector = document.createElement("div");
-  const numPlayersSelectorHover = document.createElement("div");
-  const numPlayersContent = document.createElement("div");
-  const launchGame = document.createElement("div");
+  Object.assign(notification, {
+    id: "notification",
+    className: "notification",
+  });
 
-  notification.id = "notification";
-  notification.className = "notification";
-  optionsBox.className = "options-box";
-  gameSelector.className = "game-select";
-  gameSelectorHover.className = "hover-select";
-  gameSelectorHover.textContent = "SELECT GAME▼";
-  selectContent.className = "game-select-content";
-  numPlayersSelector.className = "game-select";
-  numPlayersSelectorHover.className = "hover-select";
-  numPlayersSelectorHover.textContent = "# PLAYERS:";
-  numPlayersContent.className = "num-select-content";
-  launchGame.className = "launch-button";
-  launchGame.textContent = "START GAME ►";
+  const optionsBox = document.createElement("div");
+  Object.assign(optionsBox, { className: "options-box" });
+
+  const gameSelector = document.createElement("div");
+  Object.assign(gameSelector, { className: "game-select" });
+
+  const gameSelectorHover = document.createElement("div");
+  Object.assign(gameSelectorHover, {
+    className: "hover-select",
+    textContent: "SELECT GAME▼",
+  });
+
+  const selectContent = document.createElement("div");
+  Object.assign(selectContent, { className: "game-select-content" });
+
+  const numPlayersSelector = document.createElement("div");
+  Object.assign(numPlayersSelector, { className: "game-select" });
+
+  const numPlayersSelectorHover = document.createElement("div");
+  Object.assign(numPlayersSelectorHover, {
+    className: "hover-select",
+    textContent: "# PLAYERS:",
+  });
+
+  const numPlayersContent = document.createElement("div");
+  Object.assign(numPlayersContent, { className: "num-select-content" });
+
+  const launchGameButton = document.createElement("div");
+  Object.assign(launchGameButton, {
+    className: "launch-button",
+    textContent: "START GAME ►",
+  });
 
   gameArea.appendChild(notification);
   notification.appendChild(optionsBox);
-  notification.appendChild(launchGame);
+  notification.appendChild(launchGameButton);
   optionsBox.appendChild(gameSelector);
   optionsBox.appendChild(numPlayersSelector);
   gameSelector.appendChild(gameSelectorHover);
@@ -204,9 +133,9 @@ const mainMenu = async function (gameArea) {
 
   async function cardClick() {
     return new Promise((resolve) => {
-      launchGame.addEventListener("click", function () {
+      launchGameButton.addEventListener("click", function () {
         if (gameSelectorHover.textContent === "CRAZY EIGHTS▼") {
-          deck.shuffle();
+          shuffle(deck);
           crazyEights(
             deck,
             cardBack,
@@ -218,10 +147,7 @@ const mainMenu = async function (gameArea) {
     });
   }
 
-  await new Promise(async function (resolve) {
-    await cardClick();
-    resolve();
-  });
+  await cardClick();
 
   return;
 };
