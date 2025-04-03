@@ -1,47 +1,8 @@
 import { crazyEights } from "./Crazy Eights/game.js";
 
-import {
-  shuffle,
-  randomChoice,
-  randBetween,
-  cardName,
-  correctCardOrder,
-} from "./shared.js";
+import { shuffle, createDeck } from "./shared.js";
 
-const createDeck = function () {
-  const values = [
-    "A",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "J",
-    "Q",
-    "K",
-  ];
-  const suites = ["♠", "♦", "♥", "♣"];
-  const cardBack = randomChoice(["BLUE", "RED"]);
-  const deck = [];
-  const deckWithJokers = [];
-
-  for (let i of values) {
-    for (let j of suites) {
-      deck.push(i + j);
-      deckWithJokers.push(i + j);
-    }
-  }
-  deckWithJokers.push("BJOKER", "RJOKER");
-
-  shuffle(deck);
-  shuffle(deckWithJokers);
-
-  return [deck, deckWithJokers, cardBack];
-};
+const [deck, deckWithJokers, cardBack] = createDeck();
 
 const mainMenu = async function (gameArea) {
   const notification = document.createElement("div");
@@ -83,16 +44,6 @@ const mainMenu = async function (gameArea) {
     textContent: "START GAME ►",
   });
 
-  gameArea.appendChild(notification);
-  notification.appendChild(optionsBox);
-  notification.appendChild(launchGameButton);
-  optionsBox.appendChild(gameSelector);
-  optionsBox.appendChild(numPlayersSelector);
-  gameSelector.appendChild(gameSelectorHover);
-  gameSelector.appendChild(selectContent);
-  numPlayersSelector.appendChild(numPlayersSelectorHover);
-  numPlayersSelector.appendChild(numPlayersContent);
-
   const gameOptions = [
     { value: "crazy-eights", text: "CRAZY EIGHTS" },
     { value: "go-fish", text: "GO FISH (COMING SOON)" },
@@ -105,31 +56,47 @@ const mainMenu = async function (gameArea) {
 
   gameOptions.forEach((option) => {
     const optionElement = document.createElement("div");
-    optionElement.id = option.value;
-    optionElement.textContent = option.text;
+    Object.assign(optionElement, {
+      id: option.value,
+      textContent: option.text,
+    });
+
     if (!optionElement.textContent.includes("(COMING SOON)")) {
       optionElement.addEventListener("click", function () {
         gameSelectorHover.textContent = `${optionElement.textContent}▼`;
 
-        if (numPlayersSelectorHover.textContent.at(-1) != 2) {
+        if (optionElement.textContent === "CRAZY EIGHTS") {
           numPlayersSelectorHover.textContent = "# PLAYERS: 2";
 
           numPlayerOptions = ["2", "3", "4"];
 
-          numPlayerOptions.forEach((option) => {
-            const optionElement = document.createElement("div");
-            optionElement.id = option;
-            optionElement.textContent = option;
-            optionElement.addEventListener("click", function () {
-              numPlayersSelectorHover.textContent = `# PLAYERS: ${option}`;
+          numPlayerOptions.forEach((number) => {
+            const numElement = document.createElement("div");
+            Object.assign(numElement, {
+              id: number,
+              textContent: number,
             });
-            numPlayersContent.appendChild(optionElement);
+
+            numElement.addEventListener("click", function () {
+              numPlayersSelectorHover.textContent = `# PLAYERS: ${number}`;
+            });
+            numPlayersContent.appendChild(numElement);
           });
         }
       });
     }
     selectContent.appendChild(optionElement);
   });
+
+  gameArea.appendChild(notification);
+  notification.appendChild(optionsBox);
+  notification.appendChild(launchGameButton);
+  optionsBox.appendChild(gameSelector);
+  optionsBox.appendChild(numPlayersSelector);
+  gameSelector.appendChild(gameSelectorHover);
+  gameSelector.appendChild(selectContent);
+  numPlayersSelector.appendChild(numPlayersSelectorHover);
+  numPlayersSelector.appendChild(numPlayersContent);
 
   async function cardClick() {
     return new Promise((resolve) => {
@@ -163,5 +130,4 @@ export async function startUp() {
   mainMenu(gameArea);
 }
 
-const [deck, deckWithJokers, cardBack] = createDeck();
 startUp();

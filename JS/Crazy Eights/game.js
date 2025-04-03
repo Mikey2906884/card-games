@@ -12,90 +12,18 @@ import {
   moveCard,
 } from "../shared.js";
 
-import { populateDeck, createDiscard, createHands } from "./support.js";
-
-const initialDeal = function (
-  deck,
-  playerHand,
-  comHandOne,
-  comHandTwo,
-  comHandThree,
-  discard,
-  numPlayers,
-  turnOrder
-) {
-  let cardsInDeck = deck.querySelectorAll(".card-container");
-  console.log(cardsInDeck[0]);
-
-  for (let i = 0; i < 5; i++) {
-    switch (numPlayers) {
-      case 2:
-        switch (turnOrder) {
-          case 1:
-            moveCard(deck, playerHand, cardsInDeck[0], "CRAZY EIGHTS");
-            moveCard(deck, comHandTwo, cardsInDeck[1], "CRAZY EIGHTS");
-            break;
-          case 2:
-            moveCard(deck, comHandTwo, cardsInDeck[0], "CRAZY EIGHTS");
-            moveCard(deck, playerHand, cardsInDeck[1], "CRAZY EIGHTS");
-        }
-        break;
-      case 3:
-        switch (turnOrder) {
-          case 1:
-            moveCard(deck, playerHand, cardsInDeck[0], "CRAZY EIGHTS");
-            moveCard(deck, comHandOne, cardsInDeck[1], "CRAZY EIGHTS");
-            moveCard(deck, comHandThree, cardsInDeck[2], "CRAZY EIGHTS");
-            break;
-          case 2:
-            moveCard(deck, comHandOne, cardsInDeck[0], "CRAZY EIGHTS");
-            moveCard(deck, comHandThree, cardsInDeck[1], "CRAZY EIGHTS");
-            moveCard(deck, playerHand, cardsInDeck[2], "CRAZY EIGHTS");
-            break;
-          case 3:
-            moveCard(deck, comHandThree, cardsInDeck[0], "CRAZY EIGHTS");
-            moveCard(deck, playerHand, cardsInDeck[1], "CRAZY EIGHTS");
-            moveCard(deck, comHandOne, cardsInDeck[2], "CRAZY EIGHTS");
-        }
-        break;
-      case 4:
-        switch (turnOrder) {
-          case 1:
-            moveCard(deck, playerHand, cardsInDeck[0], "CRAZY EIGHTS");
-            moveCard(deck, comHandOne, cardsInDeck[1], "CRAZY EIGHTS");
-            moveCard(deck, comHandTwo, cardsInDeck[2], "CRAZY EIGHTS");
-            moveCard(deck, comHandThree, cardsInDeck[3], "CRAZY EIGHTS");
-            break;
-          case 2:
-            moveCard(deck, comHandOne, cardsInDeck[0], "CRAZY EIGHTS");
-            moveCard(deck, comHandTwo, cardsInDeck[1], "CRAZY EIGHTS");
-            moveCard(deck, comHandThree, cardsInDeck[2], "CRAZY EIGHTS");
-            moveCard(deck, playerHand, cardsInDeck[3], "CRAZY EIGHTS");
-            break;
-          case 3:
-            moveCard(deck, comHandTwo, cardsInDeck[0], "CRAZY EIGHTS");
-            moveCard(deck, comHandThree, cardsInDeck[1], "CRAZY EIGHTS");
-            moveCard(deck, playerHand, cardsInDeck[2], "CRAZY EIGHTS");
-            moveCard(deck, comHandOne, cardsInDeck[3], "CRAZY EIGHTS");
-            break;
-          case 4:
-            moveCard(deck, comHandThree, cardsInDeck[0], "CRAZY EIGHTS");
-            moveCard(deck, playerHand, cardsInDeck[1], "CRAZY EIGHTS");
-            moveCard(deck, comHandOne, cardsInDeck[2], "CRAZY EIGHTS");
-            moveCard(deck, comHandTwo, cardsInDeck[3], "CRAZY EIGHTS");
-        }
-    }
-
-    cardsInDeck = deck.querySelectorAll(".card-container");
-  }
-
-  moveCard(deck, discard, cardsInDeck[0], "CRAZY EIGHTS");
-};
+import {
+  populateDeck,
+  createDiscard,
+  createHands,
+  initialDeal,
+} from "./support.js";
 
 const playerPlayedEight = async function (cardPlayed, gameArea) {
   eightsCount += 1;
   await new Promise(async function (resolve) {
     const notification = document.createElement("div");
+    Object.assign(notification, {});
     const suitesContainer = document.createElement("div");
     const spades = document.createElement("div");
     const diamonds = document.createElement("div");
@@ -223,6 +151,7 @@ const playerTurn = async function (playerHand, deck, discard, gameArea) {
           ) {
             Counter++;
             card.style.bottom = "3vh";
+            card.style.boxShadow = "0 0 25px white";
           }
 
           card.clickMe = async function () {

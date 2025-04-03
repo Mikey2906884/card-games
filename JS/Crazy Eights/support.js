@@ -1,3 +1,5 @@
+import { moveCard } from "../shared.js";
+
 export function populateDeck(deck, cardBack) {
   const deckDiv = document.getElementById("deck");
 
@@ -82,19 +84,23 @@ export function createHands(gameArea, numPlayers) {
       gameArea.appendChild(comHands[0]);
       break;
     case 3:
-      [
-        comHands[0].id,
-        comHands[0].classList,
-        comHands[0].style.maxWidth,
-        comHands[0].style.left,
-      ] = ["com-hand-one", "hand v-hand", "50vh", "0"];
+      Object.assign(comHands[0], {
+        id: "com-hand-one",
+        classList: "hand v-hand",
+      });
+      Object.assign(comHands[0].style, {
+        maxWidth: "50vh",
+        left: "0",
+      });
 
-      [
-        comHands[1].id,
-        comHands[1].classList,
-        comHands[1].style.maxWidth,
-        comHands[1].style.right,
-      ] = ["com-hand-three", "hand v-hand", "50vh", "0"];
+      Object.assign(comHands[1], {
+        id: "com-hand-three",
+        classList: "hand v-hand",
+      });
+      Object.assign(comHands[1].style, {
+        maxWidth: "50vh",
+        right: "0",
+      });
 
       window.addEventListener("resize", () => {
         setTimeout(function () {
@@ -113,26 +119,32 @@ export function createHands(gameArea, numPlayers) {
       gameArea.appendChild(comHands[1]);
       break;
     case 4:
-      [
-        comHands[0].id,
-        comHands[0].classList,
-        comHands[0].style.maxWidth,
-        comHands[0].style.left,
-      ] = ["com-hand-one", "hand v-hand", "50vh", "0"];
+      Object.assign(comHands[0], {
+        id: "com-hand-one",
+        classList: "hand v-hand",
+      });
+      Object.assign(comHands[0].style, {
+        maxWidth: "50vh",
+        left: "0",
+      });
 
-      [
-        comHands[1].id,
-        comHands[1].classList,
-        comHands[1].style.maxWidth,
-        comHands[1].style.top,
-      ] = ["com-hand-two", "hand h-hand", "50vw", "0"];
+      Object.assign(comHands[1], {
+        id: "com-hand-two",
+        classList: "hand h-hand",
+      });
+      Object.assign(comHands[1].style, {
+        maxWidth: "50vw",
+        top: "0",
+      });
 
-      [
-        comHands[2].id,
-        comHands[2].classList,
-        comHands[2].style.maxWidth,
-        comHands[2].style.right,
-      ] = ["com-hand-three", "hand v-hand", "50vh", "0"];
+      Object.assign(comHands[2], {
+        id: "com-hand-three",
+        classList: "hand v-hand",
+      });
+      Object.assign(comHands[2].style, {
+        maxWidth: "50vh",
+        right: "0",
+      });
 
       window.addEventListener("resize", () => {
         setTimeout(function () {
@@ -154,12 +166,14 @@ export function createHands(gameArea, numPlayers) {
       gameArea.appendChild(comHands[2]);
   }
 
-  [
-    playerHand.id,
-    playerHand.classList,
-    playerHand.style.maxWidth,
-    playerHand.style.bottom,
-  ] = ["player-hand", "hand h-hand player", "50vw", "0"];
+  Object.assign(playerHand, {
+    id: "player-hand",
+    classList: "hand h-hand player",
+  });
+  Object.assign(playerHand.style, {
+    maxWidth: "50vw",
+    bottom: "0",
+  });
 
   playerHand.addEventListener("mouseover", () => {
     const cardsInHand = playerHand.querySelectorAll(".card-container");
@@ -225,11 +239,86 @@ export function createHands(gameArea, numPlayers) {
   switch (numPlayers) {
     case 2:
       return [comHands[0], playerHand];
-      break;
     case 3:
       return [comHands[0], comHands[1], playerHand];
-      break;
     case 4:
       return [comHands[0], comHands[1], comHands[2], playerHand];
   }
+}
+
+export function initialDeal(
+  deck,
+  playerHand,
+  comHandOne,
+  comHandTwo,
+  comHandThree,
+  discard,
+  numPlayers,
+  turnOrder
+) {
+  let cardsInDeck = deck.querySelectorAll(".card-container");
+
+  for (let i = 0; i < 5; i++) {
+    switch (numPlayers) {
+      case 2:
+        switch (turnOrder) {
+          case 1:
+            moveCard(deck, playerHand, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandTwo, cardsInDeck[1], "CRAZY EIGHTS");
+            break;
+          case 2:
+            moveCard(deck, comHandTwo, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[1], "CRAZY EIGHTS");
+        }
+        break;
+      case 3:
+        switch (turnOrder) {
+          case 1:
+            moveCard(deck, playerHand, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandOne, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, comHandThree, cardsInDeck[2], "CRAZY EIGHTS");
+            break;
+          case 2:
+            moveCard(deck, comHandOne, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandThree, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[2], "CRAZY EIGHTS");
+            break;
+          case 3:
+            moveCard(deck, comHandThree, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, comHandOne, cardsInDeck[2], "CRAZY EIGHTS");
+        }
+        break;
+      case 4:
+        switch (turnOrder) {
+          case 1:
+            moveCard(deck, playerHand, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandOne, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, comHandTwo, cardsInDeck[2], "CRAZY EIGHTS");
+            moveCard(deck, comHandThree, cardsInDeck[3], "CRAZY EIGHTS");
+            break;
+          case 2:
+            moveCard(deck, comHandOne, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandTwo, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, comHandThree, cardsInDeck[2], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[3], "CRAZY EIGHTS");
+            break;
+          case 3:
+            moveCard(deck, comHandTwo, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, comHandThree, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[2], "CRAZY EIGHTS");
+            moveCard(deck, comHandOne, cardsInDeck[3], "CRAZY EIGHTS");
+            break;
+          case 4:
+            moveCard(deck, comHandThree, cardsInDeck[0], "CRAZY EIGHTS");
+            moveCard(deck, playerHand, cardsInDeck[1], "CRAZY EIGHTS");
+            moveCard(deck, comHandOne, cardsInDeck[2], "CRAZY EIGHTS");
+            moveCard(deck, comHandTwo, cardsInDeck[3], "CRAZY EIGHTS");
+        }
+    }
+
+    cardsInDeck = deck.querySelectorAll(".card-container");
+  }
+
+  moveCard(deck, discard, cardsInDeck[0], "CRAZY EIGHTS");
 }

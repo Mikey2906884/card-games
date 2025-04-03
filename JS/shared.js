@@ -20,6 +20,41 @@ export function shuffle(deck) {
   return deck;
 }
 
+export function createDeck() {
+  const values = [
+    "A",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "J",
+    "Q",
+    "K",
+  ];
+  const suites = ["♠", "♦", "♥", "♣"];
+  const cardBack = randomChoice(["BLUE", "RED"]);
+  const deck = [];
+  const deckWithJokers = [];
+
+  for (let i of values) {
+    for (let j of suites) {
+      deck.push(i + j);
+      deckWithJokers.push(i + j);
+    }
+  }
+  deckWithJokers.push("BJOKER", "RJOKER");
+
+  shuffle(deck);
+  shuffle(deckWithJokers);
+
+  return [deck, deckWithJokers, cardBack];
+}
+
 export function correctCardOrder(container, game) {
   let cards = container.querySelectorAll(".card-container");
   for (let card of cards) {
@@ -191,8 +226,11 @@ export async function moveCard(from, to, card, game) {
 
   // CARD ANIMATION CONTROL
   await new Promise((resolve) => {
-    card.style.display = null;
-    card.style.position = "fixed";
+    Object.assign(card.style, {
+      display: null,
+      boxShadow: null,
+      position: "fixed",
+    });
 
     if (from.id === "com-hand-three") {
       card.style.top = `${from.offsetTop}px`;
