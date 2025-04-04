@@ -1,4 +1,4 @@
-import { moveCard } from "../shared.js";
+import { cardName, moveCard, correctHandVis, shuffle } from "../shared.js";
 
 export function populateDeck(deck, cardBack) {
   const deckDiv = document.getElementById("deck");
@@ -321,4 +321,216 @@ export function initialDeal(
   }
 
   moveCard(deck, discard, cardsInDeck[0], "CRAZY EIGHTS");
+}
+
+export async function playerPlayedEight(cardPlayed, gameArea) {
+  eightsCount += 1;
+  await new Promise(async function (resolve) {
+    const notification = document.createElement("div");
+    Object.assign(notification, {
+      id: "notification",
+      textContent: "EIGHT PLAYED",
+    });
+
+    const suitesContainer = document.createElement("div");
+    Object.assign(suitesContainer, { id: "♠♦♣♥" });
+
+    const spades = document.createElement("div");
+    Object.assign(spades, {
+      className: "♠",
+      textContent: "♠",
+    });
+
+    const diamonds = document.createElement("div");
+    Object.assign(diamonds, {
+      className: "♦",
+      textContent: "♦",
+    });
+
+    const clovers = document.createElement("div");
+    Object.assign(clovers, {
+      className: "♣",
+      textContent: "♣",
+    });
+
+    const hearts = document.createElement("div");
+    Object.assign(hearts, {
+      className: "♥",
+      textContent: "♥",
+    });
+
+    let suiteChoice;
+
+    gameArea.appendChild(notification);
+
+    async function cardClick() {
+      return new Promise((resolve) => {
+        setTimeout(function () {
+          notification.textContent = "PICK THE NEW SUITE";
+          notification.appendChild(suitesContainer);
+          suitesContainer.appendChild(spades);
+          suitesContainer.appendChild(diamonds);
+          suitesContainer.appendChild(clovers);
+          suitesContainer.appendChild(hearts);
+
+          spades.addEventListener("click", function () {
+            suiteChoice = "♠";
+            resolve();
+          });
+          diamonds.addEventListener("click", function () {
+            suiteChoice = "♦";
+            resolve();
+          });
+          clovers.addEventListener("click", function () {
+            suiteChoice = "♣";
+            resolve();
+          });
+          hearts.addEventListener("click", function () {
+            suiteChoice = "♥";
+            resolve();
+          });
+        }, 2000);
+      });
+    }
+    await cardClick();
+
+    notification.textContent = `CHANGED SUITE TO ${suiteChoice}`;
+
+    setTimeout(function () {
+      gameArea.removeChild(notification);
+    }, 2000);
+
+    setTimeout(function () {
+      Object.assign(cardPlayed, {
+        id: `8${eightsCount + suiteChoice}-container`,
+      });
+
+      Object.assign(cardPlayed.querySelector(".front").style, {
+        backgroundImage: `url("../Images/Cards/8${suiteChoice}.png")`,
+      });
+
+      resolve();
+    }, 3000);
+  });
+}
+
+export async function comPlayedEight(suiteChoice, cardPlayed, gameArea) {
+  eightsCount += 1;
+  await new Promise(async function (resolve) {
+    const notification = document.createElement("div");
+    Object.assign(notification, {
+      id: "notification",
+      textContent: "EIGHT PLAYED",
+    });
+
+    gameArea.appendChild(notification);
+
+    setTimeout(function () {
+      notification.textContent = `CHANGED SUITE TO ${suiteChoice}`;
+    }, 2000);
+
+    setTimeout(function () {
+      gameArea.removeChild(notification);
+    }, 4000);
+
+    setTimeout(function () {
+      Object.assign(cardPlayed, {
+        id: `8${eightsCount + suiteChoice}-container`,
+      });
+
+      Object.assign(cardPlayed.querySelector(".front").style, {
+        backgroundImage: `url("../Images/Cards/8${suiteChoice}.png")`,
+      });
+
+      resolve();
+    }, 5000);
+  });
+}
+
+export async function deckCheck(deck, discard) {
+  if (deck.querySelectorAll(".card-container").length === 0) {
+    await new Promise(function (resolve) {
+      for (let card of discard.querySelectorAll(".card-container")) {
+        if (
+          card != Array.from(discard.querySelectorAll(".card-container")).at(-1)
+        ) {
+          moveCard(discard, deck, card, "CRAZY EIGHTS");
+        } else {
+          resolve();
+        }
+      }
+    });
+    const deckArray = Array.from(deck.querySelectorAll(".card-container"));
+    shuffle(deckArray);
+
+    await new Promise(function () {
+      for (let card of deckArray) {
+        deck.removeChild(card);
+        deck.appendChild(card);
+      }
+    });
+  }
+}
+
+export function pointsIncrease(entity, trackerID) {
+  for (let card of entity.querySelectorAll(".card-container")) {
+    if (["1", "J", "Q", "K"].includes(cardName(card)[0])) {
+      trackerID += 10;
+    } else if (cardName(card)[0] === "A") {
+      trackerID += 1;
+    } else {
+      trackerID += parseInt(cardName(card)[0]);
+    }
+  }
+  return trackerID;
+}
+
+export async function playerDraw(playerHand, deck, discard, topOfDiscard) {
+  return new Promise((resolve) => {
+    let topOfDeck = Array.from(deck.querySelectorAll(".card-container")).at(-1);
+
+    deck.style.cursor = "pointer";
+    deck.style.boxShadow = "0 0 50px red";
+
+    topOfDeck.draw = async function () {
+      let drawing = 0;
+
+      while (drawing === 0) {
+        moveCard(deck, playerHand, topOfDeck, "CRAZY EIGHTS");
+
+        topOfDeck.removeEventListener("click", topOfDeck.draw);
+
+        setTimeout(function () {
+          deckCheck(deck, discard);
+        }, 500);
+
+        await new Promise(function (resolve) {
+          setTimeout(async function () {
+            if (
+              !(
+                cardName(topOfDeck)[0] === cardName(topOfDiscard)[0] &&
+                cardName(topOfDeck)[0] != "8"
+              ) &&
+              !(
+                cardName(topOfDeck).at(-1) === cardName(topOfDiscard).at(-1) &&
+                cardName(topOfDeck)[0] != "8"
+              ) &&
+              !(cardName(topOfDeck)[0] === "8")
+            ) {
+              topOfDeck = Array.from(
+                deck.querySelectorAll(".card-container")
+              ).at(-1);
+              resolve();
+            } else {
+              drawing = 1;
+              resolve();
+            }
+          }, 1000);
+        });
+      }
+      resolve();
+    };
+
+    topOfDeck.addEventListener("click", topOfDeck.draw);
+  });
 }

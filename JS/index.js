@@ -102,6 +102,9 @@ const mainMenu = async function (gameArea) {
     return new Promise((resolve) => {
       launchGameButton.addEventListener("click", function () {
         if (gameSelectorHover.textContent === "CRAZY EIGHTS▼") {
+          globalThis.eightsCount = 0;
+          globalThis.roundTracker = 1;
+          globalThis.pointsTracker = [];
           shuffle(deck);
           crazyEights(
             deck,

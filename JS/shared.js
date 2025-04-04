@@ -244,20 +244,22 @@ export async function moveCard(from, to, card, game) {
 
     setTimeout(function () {
       if (to.id === "com-hand-three") {
-        card.style.top = `${to.offsetTop}px`;
+        card.style.top = `${to.offsetRight}px`;
         card.style.left = `${
-          from.offsetLeft + from.offsetWidth - card.offsetWidth
+          to.offsetLeft + to.offsetWidth - card.offsetWidth
         }px`;
       } else {
         card.style.top = `${to.offsetTop}px`;
         card.style.left = `${to.offsetLeft}px`;
       }
       if (from.id != "player-hand") {
-        card.querySelector(".card").style.transform = `rotateX(${
-          card.querySelector(".card").style.transform === "rotateX(180deg)"
-            ? "0"
-            : "180"
-        }deg)`;
+        if (card.querySelector(".card").style.transform) {
+          card.querySelector(".card").style.transform = `rotateX(${
+            card.querySelector(".card").style.transform === "rotateX(180deg)"
+              ? "0"
+              : "180"
+          }deg)`;
+        }
         if (toClassList.includes("discard")) {
           card.querySelector(".card").style.transform =
             "rotateY(0deg) rotateZ(180deg)";
@@ -266,6 +268,9 @@ export async function moveCard(from, to, card, game) {
       if (toClassList.includes("player")) {
         card.querySelector(".card").style.transform =
           "rotateY(0deg) rotateZ(-180deg)";
+      }
+      if (to.id === "deck") {
+        card.querySelector(".card").style.transform = null;
       }
     }, 100);
 
