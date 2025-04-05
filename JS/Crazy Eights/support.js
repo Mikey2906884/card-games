@@ -478,6 +478,8 @@ export function pointsIncrease(entity, trackerID) {
       trackerID += 10;
     } else if (cardName(card)[0] === "A") {
       trackerID += 1;
+    } else if (cardName(card)[0] === "8") {
+      trackerID += 50;
     } else {
       trackerID += parseInt(cardName(card)[0]);
     }
