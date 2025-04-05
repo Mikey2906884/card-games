@@ -2,8 +2,6 @@ import { crazyEights } from "./Crazy Eights/game.js";
 
 import { shuffle, createDeck } from "./shared.js";
 
-const [deck, deckWithJokers, cardBack] = createDeck();
-
 const mainMenu = async function (gameArea) {
   const notification = document.createElement("div");
   Object.assign(notification, {
@@ -21,6 +19,53 @@ const mainMenu = async function (gameArea) {
   Object.assign(gameSelectorHover, {
     className: "hover-select",
     textContent: "SELECT GAME▼",
+  });
+
+  const bgSelectMainContainer = document.createElement("div");
+  Object.assign(bgSelectMainContainer, {
+    id: "bg-select-main-container",
+    className: "bg-select-main-container",
+  });
+
+  const bgSelectFlexContainer = document.createElement("div");
+  Object.assign(bgSelectFlexContainer, {
+    id: "bg-select-flex-container",
+    className: "bg-select-flex-container",
+  });
+
+  const bgSelectTop = document.createElement("div");
+  Object.assign(bgSelectTop, {
+    id: "bg-select-top",
+    className: "bg-select-top",
+    textContent: "SELECT CARD BACK",
+  });
+
+  const bgSelectBottom = document.createElement("div");
+  Object.assign(bgSelectBottom, {
+    id: "bg-select-bottom",
+    className: "bg-select-bottom",
+    textContent: "STANDARD_BLUE",
+  });
+
+  const bgSelect = document.createElement("div");
+  Object.assign(bgSelect, {
+    id: "background-select",
+    className: "background-select",
+  });
+  bgSelect.style.backgroundImage = `url("../Images/Cards/Backs/${bgSelectBottom.textContent}.png")`;
+
+  const bgIncrement = document.createElement("div");
+  Object.assign(bgIncrement, {
+    id: "bg-increment",
+    className: "bg-increment",
+    textContent: "►",
+  });
+
+  const bgDecrement = document.createElement("div");
+  Object.assign(bgDecrement, {
+    id: "bg-decrement",
+    className: "bg-decrement",
+    textContent: "◄",
   });
 
   const selectContent = document.createElement("div");
@@ -88,15 +133,59 @@ const mainMenu = async function (gameArea) {
     selectContent.appendChild(optionElement);
   });
 
+  const bgOptions = [
+    "STANDARD_BLUE",
+    "STANDARD_RED",
+    "BLUE_WAVES",
+    "PINK_WAVES",
+    "LAUGHING_DRAGON",
+    "GOOD_BOI",
+    "GRUMPY_CAT",
+    "FIRE",
+    "STARS",
+    "CARD_WASH",
+    "CRAZY_EIGHTS",
+  ];
+  let bgOptionSelected = 1;
+
+  bgIncrement.addEventListener("click", function () {
+    Object.assign(bgSelectBottom, {
+      textContent: `${bgOptions.at(bgOptionSelected++ % bgOptions.length)}`,
+    });
+    bgSelect.style.backgroundImage = `url("../Images/Cards/Backs/${bgSelectBottom.textContent}.png")`;
+  });
+
+  bgDecrement.addEventListener("click", function () {
+    Object.assign(bgSelectBottom, {
+      textContent: `${bgOptions.at(bgOptionSelected-- % bgOptions.length)}`,
+    });
+    bgSelect.style.backgroundImage = `url("../Images/Cards/Backs/${bgSelectBottom.textContent}.png")`;
+  });
+
   gameArea.appendChild(notification);
+
   notification.appendChild(optionsBox);
   notification.appendChild(launchGameButton);
+  notification.appendChild(bgSelectMainContainer);
+
   optionsBox.appendChild(gameSelector);
   optionsBox.appendChild(numPlayersSelector);
+
   gameSelector.appendChild(gameSelectorHover);
   gameSelector.appendChild(selectContent);
+
   numPlayersSelector.appendChild(numPlayersSelectorHover);
   numPlayersSelector.appendChild(numPlayersContent);
+
+  bgSelectMainContainer.appendChild(bgSelectTop);
+  bgSelectMainContainer.appendChild(bgSelectFlexContainer);
+  bgSelectMainContainer.appendChild(bgSelectBottom);
+
+  bgSelectFlexContainer.appendChild(bgDecrement);
+  bgSelectFlexContainer.appendChild(bgSelect);
+  bgSelectFlexContainer.appendChild(bgIncrement);
+
+  const [deck, deckWithJokers] = createDeck();
 
   async function cardClick() {
     return new Promise((resolve) => {
@@ -108,7 +197,7 @@ const mainMenu = async function (gameArea) {
           shuffle(deck);
           crazyEights(
             deck,
-            cardBack,
+            bgSelectBottom.textContent,
             parseInt(numPlayersSelectorHover.textContent.at(-1))
           );
           resolve;
@@ -118,8 +207,6 @@ const mainMenu = async function (gameArea) {
   }
 
   await cardClick();
-
-  return;
 };
 
 export async function startUp() {

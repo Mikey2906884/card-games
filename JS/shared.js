@@ -37,7 +37,6 @@ export function createDeck() {
     "K",
   ];
   const suites = ["♠", "♦", "♥", "♣"];
-  const cardBack = randomChoice(["BLUE", "RED"]);
   const deck = [];
   const deckWithJokers = [];
 
@@ -52,7 +51,7 @@ export function createDeck() {
   shuffle(deck);
   shuffle(deckWithJokers);
 
-  return [deck, deckWithJokers, cardBack];
+  return [deck, deckWithJokers];
 }
 
 export function correctCardOrder(container, game) {
@@ -232,42 +231,61 @@ export async function moveCard(from, to, card, game) {
       position: "fixed",
     });
 
-    if (from.id === "com-hand-three") {
-      card.style.top = `${from.offsetTop}px`;
-      card.style.left = `${
-        from.offsetLeft + from.offsetWidth - card.offsetWidth
-      }px`;
+    if (from.id === "com-hand-one") {
+      Object.assign(card.style, {
+        top: `${to.offsetTop}px`,
+        left: "0",
+      });
+    } else if (from.id === "com-hand-three") {
+      Object.assign(card.style, {
+        top: `${to.offsetTop}px`,
+        left: `calc(100vw - ${card.offsetWidth}px)`,
+      });
     } else {
-      card.style.top = `${from.offsetTop}px`;
-      card.style.left = `${from.offsetLeft}px`;
+      Object.assign(card.style, {
+        top: `${from.offsetTop}px`,
+        left: `${from.offsetLeft}px`,
+      });
     }
 
     setTimeout(function () {
-      if (to.id === "com-hand-three") {
-        card.style.top = `${to.offsetRight}px`;
-        card.style.left = `${
-          to.offsetLeft + to.offsetWidth - card.offsetWidth
-        }px`;
+      if (to.id === "com-hand-one") {
+        Object.assign(card.style, {
+          top: `${from.offsetTop}px`,
+          left: "0",
+        });
+      } else if (to.id === "com-hand-three") {
+        Object.assign(card.style, {
+          top: `${from.offsetTop}px`,
+          left: `calc(100vw - ${card.offsetWidth}px)`,
+          transform: "rotateZ(180deg)",
+        });
       } else {
-        card.style.top = `${to.offsetTop}px`;
-        card.style.left = `${to.offsetLeft}px`;
+        Object.assign(card.style, {
+          top: `${to.offsetTop}px`,
+          left: `${to.offsetLeft}px`,
+        });
       }
       if (from.id != "player-hand") {
         if (card.querySelector(".card").style.transform) {
-          card.querySelector(".card").style.transform = `rotateX(${
-            card.querySelector(".card").style.transform === "rotateX(180deg)"
-              ? "0"
-              : "180"
-          }deg)`;
+          Object.assign(card.querySelector(".card").style, {
+            transform: `rotateX(${
+              card.querySelector(".card").style.transform === "rotateX(180deg)"
+                ? "0"
+                : "180"
+            }deg)`,
+          });
         }
         if (toClassList.includes("discard")) {
-          card.querySelector(".card").style.transform =
-            "rotateY(0deg) rotateZ(180deg)";
+          Object.assign(card.querySelector(".card").style, {
+            transform: "rotateY(0deg) rotateZ(180deg)",
+          });
         }
       }
       if (toClassList.includes("player")) {
-        card.querySelector(".card").style.transform =
-          "rotateY(0deg) rotateZ(-180deg)";
+        Object.assign(card.querySelector(".card").style, {
+          transform: "rotateY(0deg) rotateZ(-180deg)",
+        });
       }
       if (to.id === "deck") {
         card.querySelector(".card").style.transform = null;
@@ -277,7 +295,6 @@ export async function moveCard(from, to, card, game) {
     setTimeout(function () {
       card.style.top = null;
       card.style.left = null;
-      card.style.right = null;
       resolve();
     }, 750);
   });

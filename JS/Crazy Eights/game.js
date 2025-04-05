@@ -92,7 +92,11 @@ const playerTurn = async function (playerHand, deck, discard, gameArea) {
       id: card.id,
       className: card.className,
     });
-    newCardContainer.style.position = card.style.position;
+    Object.assign(newCardContainer.style, {
+      position: card.style.position,
+      marginLeft: card.style.marginLeft,
+      marginRight: card.style.marginRight,
+    });
 
     const newCardPiece = document.createElement("div");
     Object.assign(newCardPiece, {

@@ -71,7 +71,8 @@ body {
     height: calc(21vh + 10px);
   }
 
-  .card-container {
+  .card-container,
+  .background-select {
     height: 21vh;
   }
 }
@@ -81,7 +82,8 @@ body {
   #discard {
     width: calc(14vw + 10px);
   }
-  .card-container {
+  .card-container,
+  .background-select {
     width: 14vw;
   }
 }
@@ -227,7 +229,9 @@ div.player > .card-container:hover {
 .num-select-content div:hover,
 .launch-button:hover,
 #back-to-main:hover,
-#continuer:hover {
+#continuer:hover,
+.bg-increment:hover,
+.bg-decrement:hover {
   cursor: pointer;
   color: white;
 }
@@ -252,4 +256,35 @@ div.player > .card-container:hover {
   right: 0;
   bottom: 0;
   padding: 3vh;
+}
+
+.bg-select-main-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1vw;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  right: 0;
+  bottom: 0;
+  padding: 2vh;
+  font-size: 1.5vw;
+}
+
+.bg-increment,
+.bg-decrement {
+  font-size: 3vw;
+}
+
+.bg-select-flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3vw;
+}
+
+.background-select {
+  aspect-ratio: 3 / 4;
+  background-size: cover;
+  border-radius: 10px;
 }
