@@ -374,19 +374,20 @@ const winner = async function (
 
     const playAgain = document.createElement("div");
     Object.assign(playAgain, {
-      className: "play-again",
+      classList: "play-again button",
       textContent: "PLAY AGAIN",
     });
 
     const mainMenu = document.createElement("div");
     Object.assign(mainMenu, {
-      className: "main-menu",
+      classList: "main-menu button",
       textContent: "MAIN MENU ►",
     });
 
     const continuer = document.createElement("div");
     Object.assign(continuer, {
       id: "continuer",
+      classList: "continuer button",
       textContent: "NEXT ROUND ►",
     });
 
@@ -550,8 +551,11 @@ const gamePlay = async function (
   cardBack
 ) {
   const backToMain = document.createElement("div");
-  backToMain.id = "back-to-main";
-  backToMain.textContent = "◄ BACK TO MAIN";
+  Object.assign(backToMain, {
+    id: "back-to-main",
+    classList: "back-to-main button",
+    textContent: "◄ BACK TO MAIN",
+  });
 
   backToMain.addEventListener("click", function () {
     gameArea.style.backgroundImage = null;

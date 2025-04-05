@@ -219,19 +219,9 @@ div.player > .card-container:hover {
   transition: all 0.5s ease-in-out;
 }
 
-.♠:hover,
-.♦:hover,
-.♥:hover,
-.♣:hover,
-.play-again:hover,
-.main-menu:hover,
+.button:hover,
 .game-select-content div:hover,
-.num-select-content div:hover,
-.launch-button:hover,
-#back-to-main:hover,
-#continuer:hover,
-.bg-increment:hover,
-.bg-decrement:hover {
+.num-select-content div:hover {
   cursor: pointer;
   color: white;
 }

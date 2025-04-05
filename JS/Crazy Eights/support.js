@@ -337,25 +337,25 @@ export async function playerPlayedEight(cardPlayed, gameArea) {
 
     const spades = document.createElement("div");
     Object.assign(spades, {
-      className: "♠",
+      classList: "♠ button",
       textContent: "♠",
     });
 
     const diamonds = document.createElement("div");
     Object.assign(diamonds, {
-      className: "♦",
+      classList: "♦ button",
       textContent: "♦",
     });
 
     const clovers = document.createElement("div");
     Object.assign(clovers, {
-      className: "♣",
+      classList: "♣ button",
       textContent: "♣",
     });
 
     const hearts = document.createElement("div");
     Object.assign(hearts, {
-      className: "♥",
+      classList: "♥ button",
       textContent: "♥",
     });
 
@@ -502,7 +502,7 @@ export async function playerDraw(playerHand, deck, discard, topOfDiscard) {
 
         setTimeout(function () {
           deckCheck(deck, discard);
-        }, 500);
+        }, 200);
 
         await new Promise(function (resolve) {
           setTimeout(async function () {

@@ -57,14 +57,14 @@ const mainMenu = async function (gameArea) {
   const bgIncrement = document.createElement("div");
   Object.assign(bgIncrement, {
     id: "bg-increment",
-    className: "bg-increment",
+    classList: "bg-increment button",
     textContent: "►",
   });
 
   const bgDecrement = document.createElement("div");
   Object.assign(bgDecrement, {
     id: "bg-decrement",
-    className: "bg-decrement",
+    classList: "bg-decrement button",
     textContent: "◄",
   });
 
@@ -85,7 +85,7 @@ const mainMenu = async function (gameArea) {
 
   const launchGameButton = document.createElement("div");
   Object.assign(launchGameButton, {
-    className: "launch-button",
+    classList: "launch-button button",
     textContent: "START GAME ►",
   });
 
@@ -111,6 +111,7 @@ const mainMenu = async function (gameArea) {
         gameSelectorHover.textContent = `${optionElement.textContent}▼`;
 
         if (optionElement.textContent === "CRAZY EIGHTS") {
+          numPlayersContent.replaceChildren();
           numPlayersSelectorHover.textContent = "# PLAYERS: 2";
 
           numPlayerOptions = ["2", "3", "4"];
@@ -143,21 +144,30 @@ const mainMenu = async function (gameArea) {
     "GRUMPY_CAT",
     "FIRE",
     "STARS",
+    "COSMOS",
+    "RESIDENT_EXPERT",
+    "NOT_A_BRIBE",
     "CARD_WASH",
     "CRAZY_EIGHTS",
   ];
-  let bgOptionSelected = 1;
+  let bgOptionSelected = 0;
 
   bgIncrement.addEventListener("click", function () {
+    if (bgOptionSelected === bgOptions.length - 1) bgOptionSelected = 0;
+    else bgOptionSelected++;
+
     Object.assign(bgSelectBottom, {
-      textContent: `${bgOptions.at(bgOptionSelected++ % bgOptions.length)}`,
+      textContent: `${bgOptions[bgOptionSelected]}`,
     });
     bgSelect.style.backgroundImage = `url("../Images/Cards/Backs/${bgSelectBottom.textContent}.png")`;
   });
 
   bgDecrement.addEventListener("click", function () {
+    if (bgOptionSelected === 0) bgOptionSelected = bgOptions.length - 1;
+    else bgOptionSelected--;
+
     Object.assign(bgSelectBottom, {
-      textContent: `${bgOptions.at(bgOptionSelected-- % bgOptions.length)}`,
+      textContent: `${bgOptions[bgOptionSelected]}`,
     });
     bgSelect.style.backgroundImage = `url("../Images/Cards/Backs/${bgSelectBottom.textContent}.png")`;
   });
